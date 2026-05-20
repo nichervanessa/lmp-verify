@@ -134,6 +134,7 @@
       <div class="nav-links" id="navLinks">
         <a href="index.html"     class="nav-link" data-i18n="nav.verify">Invoice Verify</a>
         <a href="#services"      class="nav-link" data-i18n="nav.services">Services</a>
+        <a href="#gallery"       class="nav-link" data-i18n="nav.gallery">Gallery</a>
         <a href="#coverage"      class="nav-link" data-i18n="nav.coverage">Coverage</a>
         <a href="#contact-section" class="nav-link" data-i18n="nav.contact">Contact</a>
         <div class="lang-switcher">
@@ -375,6 +376,126 @@
     </div>
   </section>
 
+  <!-- ══ GALLERY ══════════════════════════════════════════════════════════ -->
+  <section class="gallery-section" id="gallery">
+    <div class="container">
+      <div class="section-label" data-i18n="gallery.label">Our Work</div>
+      <h2 class="section-title" data-i18n="gallery.title">Projects We&#39;re Proud Of</h2>
+      <p class="section-desc" data-i18n="gallery.desc">Real installations across Kurdistan Region — solar panels, network setups and security camera systems done by our team.</p>
+
+      <!-- Filter tabs -->
+      <div class="gallery-filters">
+        <button class="gf-btn active" onclick="filterGallery('all')"   data-i18n="gallery.all">All Projects</button>
+        <button class="gf-btn solar"   onclick="filterGallery('solar')"   data-i18n="gallery.solar">Solar</button>
+        <button class="gf-btn internet" onclick="filterGallery('internet')" data-i18n="gallery.internet">Internet</button>
+        <button class="gf-btn camera"  onclick="filterGallery('camera')"  data-i18n="gallery.camera">Cameras</button>
+      </div>
+
+      <!-- ─── GALLERY GRID ─────────────────────────────────────────────────
+           HOW TO ADD YOUR PHOTOS:
+           1. Put your photos in a folder called "gallery/" next to about.html
+           2. Replace each placeholder below with a real <div class="gallery-item">
+           3. See gallery-uploads.html for full instructions
+      ────────────────────────────────────────────────────────────────────── -->
+      <div class="gallery-grid" id="galleryGrid">
+
+        <!-- ══ SOLAR PHOTOS ══ -->
+        <!-- Replace this block with real photo when ready: -->
+        <!-- <div class="gallery-item" data-cat="solar" onclick="openLightbox(0)">
+               <img src="gallery/solar-1.jpg" alt="Solar panel installation Erbil" loading="lazy">
+               <div class="gi-overlay">
+                 <div><div class="gi-cat solar">☀️ Solar</div><div class="gi-label">Rooftop Solar — Erbil</div></div>
+               </div>
+             </div> -->
+        <div class="gallery-placeholder" data-cat="solar">
+          <div class="ph-icon" style="background:#fef3c7">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          </div>
+          <p>☀️ Solar Installation Photo</p>
+          <small>gallery/solar-1.jpg</small>
+        </div>
+
+        <div class="gallery-placeholder" data-cat="solar">
+          <div class="ph-icon" style="background:#fef3c7">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          </div>
+          <p>☀️ Solar Installation Photo</p>
+          <small>gallery/solar-2.jpg</small>
+        </div>
+
+        <div class="gallery-placeholder" data-cat="solar">
+          <div class="ph-icon" style="background:#fef3c7">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          </div>
+          <p>☀️ Battery / Inverter Setup</p>
+          <small>gallery/solar-3.jpg</small>
+        </div>
+
+        <!-- ══ INTERNET / NETWORK PHOTOS ══ -->
+        <div class="gallery-placeholder" data-cat="internet">
+          <div class="ph-icon" style="background:#dbeafe">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#1d4ed8" stroke-width="2"><path d="M5 12.55a11 11 0 0114.08 0"/><path d="M1.42 9a16 16 0 0121.16 0"/><path d="M8.53 16.11a6 6 0 016.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+          </div>
+          <p>🌐 Network / WiFi Setup Photo</p>
+          <small>gallery/internet-1.jpg</small>
+        </div>
+
+        <div class="gallery-placeholder" data-cat="internet">
+          <div class="ph-icon" style="background:#dbeafe">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#1d4ed8" stroke-width="2"><path d="M5 12.55a11 11 0 0114.08 0"/><path d="M1.42 9a16 16 0 0121.16 0"/><path d="M8.53 16.11a6 6 0 016.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+          </div>
+          <p>🌐 Cabling / Server Room Photo</p>
+          <small>gallery/internet-2.jpg</small>
+        </div>
+
+        <div class="gallery-placeholder" data-cat="internet">
+          <div class="ph-icon" style="background:#dbeafe">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#1d4ed8" stroke-width="2"><path d="M5 12.55a11 11 0 0114.08 0"/><path d="M1.42 9a16 16 0 0121.16 0"/><path d="M8.53 16.11a6 6 0 016.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+          </div>
+          <p>🌐 Access Point Installation</p>
+          <small>gallery/internet-3.jpg</small>
+        </div>
+
+        <!-- ══ CAMERA / CCTV PHOTOS ══ -->
+        <div class="gallery-placeholder" data-cat="camera">
+          <div class="ph-icon" style="background:#d1fae5">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          </div>
+          <p>📷 CCTV Camera Installation</p>
+          <small>gallery/camera-1.jpg</small>
+        </div>
+
+        <div class="gallery-placeholder" data-cat="camera">
+          <div class="ph-icon" style="background:#d1fae5">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          </div>
+          <p>📷 NVR / Monitor Setup</p>
+          <small>gallery/camera-2.jpg</small>
+        </div>
+
+        <div class="gallery-placeholder" data-cat="camera">
+          <div class="ph-icon" style="background:#d1fae5">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          </div>
+          <p>📷 Outdoor Camera Mounting</p>
+          <small>gallery/camera-3.jpg</small>
+        </div>
+
+      </div><!-- /.gallery-grid -->
+
+      <!-- Upload reminder -->
+      <div class="gallery-upload-cta">
+        <h4 data-i18n="gallery.ctaTitle">Add Your Project Photos</h4>
+        <p data-i18n="gallery.ctaDesc">Create a <code>gallery/</code> folder, add your JPEG/PNG photos, then replace the placeholders above. See the instructions file for the exact template.</p>
+        <a href="gallery-uploads.html" target="_blank">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <span data-i18n="gallery.ctaBtn">View Photo Upload Instructions</span>
+        </a>
+      </div>
+    </div>
+  </section>
+  <!-- ══ END GALLERY ══ -->
+
   <!-- ── CTA BANNER ── -->
   <section class="cta-section">
     <div class="container">
@@ -423,12 +544,36 @@
     </div>
   </footer>
 
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" onclick="if(event.target===this)closeLightbox()">
+    <div class="lightbox-inner">
+      <button class="lb-close" onclick="closeLightbox()">✕</button>
+      <button class="lb-nav lb-prev" onclick="lbStep(-1)">‹</button>
+      <button class="lb-nav lb-next" onclick="lbStep(1)">›</button>
+      <img id="lbImg" src="" alt="" />
+      <div class="lightbox-caption" id="lbCaption"></div>
+      <div class="lightbox-sub" id="lbSub"></div>
+    </div>
+  </div>
+
   <!-- ══ TRANSLATIONS + LANG ENGINE ══ -->
   <script>
   const T = {
     en: {
+
+      'gallery.label':    'Our Work',
+      'gallery.title':    'Projects We\'re Proud Of',
+      'gallery.desc':     'Real installations across Kurdistan Region — solar panels, network setups and security camera systems done by our team.',
+      'gallery.all':      'All Projects',
+      'gallery.solar':    'Solar',
+      'gallery.internet': 'Internet',
+      'gallery.camera':   'Cameras',
+      'gallery.ctaTitle': 'Add Your Project Photos',
+      'gallery.ctaDesc':  'Create a gallery/ folder, add your JPEG/PNG photos, then replace the placeholders. See the instructions file.',
+      'gallery.ctaBtn':   'View Photo Upload Instructions',
       'meta.title':       'About SHIRWAN IT — Solar, Internet & Security Systems',
       'nav.tagline':      'Solar · Internet · Cameras',
+      'nav.gallery':      'Gallery',
       'nav.verify':       'Invoice Verify',
       'nav.services':     'Services',
       'nav.coverage':     'Coverage',
@@ -510,8 +655,20 @@
     },
 
     ar: {
+
+      'gallery.label':    'أعمالنا',
+      'gallery.title':    'مشاريع نفخر بها',
+      'gallery.desc':     'تركيبات حقيقية في جميع أنحاء إقليم كوردستان — ألواح شمسية وشبكات وأنظمة كاميرات أمنية.',
+      'gallery.all':      'جميع المشاريع',
+      'gallery.solar':    'الطاقة الشمسية',
+      'gallery.internet': 'الإنترنت',
+      'gallery.camera':   'الكاميرات',
+      'gallery.ctaTitle': 'أضف صور مشاريعك',
+      'gallery.ctaDesc':  'أنشئ مجلد gallery/ وأضف صورك بصيغة JPEG/PNG ثم استبدل أماكن الحجز. راجع ملف التعليمات.',
+      'gallery.ctaBtn':   'عرض تعليمات رفع الصور',
       'meta.title':       'عن شيروان IT — أنظمة الطاقة الشمسية والإنترنت والكاميرات',
       'nav.tagline':      'طاقة شمسية · إنترنت · كاميرات',
+      'nav.gallery':      'معرض الصور',
       'nav.verify':       'التحقق من الفاتورة',
       'nav.services':     'خدماتنا',
       'nav.coverage':     'منطقة التغطية',
@@ -593,8 +750,20 @@
     },
 
     ku: {
+
+      'gallery.label':    'کارەکانمان',
+      'gallery.title':    'پڕۆژەکانی سەرباڵابووی ئێمە',
+      'gallery.desc':     'دانانی ڕاستەقینە لەسەرتاسەری هەرێمی کوردستاندا — پانێلی خوری، تۆڕسازی و سیستەمی کامێرای ئاسایش.',
+      'gallery.all':      'هەموو پڕۆژەکان',
+      'gallery.solar':    'خوری',
+      'gallery.internet': 'ئینتەرنێت',
+      'gallery.camera':   'کامێرا',
+      'gallery.ctaTitle': 'وێنەی پڕۆژەکانت زیاد بکە',
+      'gallery.ctaDesc':  'پۆشەی gallery/ دروست بکە، وێنەکانت زیاد بکە، پاشان شوێننگرەکان جێگۆڕبکە. ڕێنمایی فایلەکە ببینە.',
+      'gallery.ctaBtn':   'بینینی ڕێنمایی بارکردنی وێنە',
       'meta.title':       'دەربارەی شیروان IT — سیستەمی خوری، ئینتەرنێت و کامێرا',
       'nav.tagline':      'خوری · ئینتەرنێت · کامێرا',
+      'nav.gallery':      'گەلەری وێنە',
       'nav.verify':       'پشتڕاستکردنەوەی پسوڵە',
       'nav.services':     'خزمەتگوزارییەکان',
       'nav.coverage':     'ناوچەی خزمەتگوزاری',
@@ -724,6 +893,81 @@
       document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 20);
     });
   });
+
+  // ══ GALLERY LOGIC ══════════════════════════════════════════════════════════
+  // Lightbox data — populated from real gallery-item elements
+  let lbItems = [];
+  let lbIndex = 0;
+
+  function buildLightboxData() {
+    lbItems = [];
+    document.querySelectorAll('.gallery-item[data-cat]').forEach(el => {
+      const img  = el.querySelector('img');
+      const lbl  = el.querySelector('.gi-label');
+      const cat  = el.querySelector('.gi-cat');
+      if (img) lbItems.push({ src: img.src, alt: img.alt, label: lbl?.textContent || '', cat: cat?.textContent || '' });
+    });
+  }
+
+  function openLightbox(index) {
+    buildLightboxData();
+    if (!lbItems.length) return;
+    lbIndex = index;
+    renderLightbox();
+    document.getElementById('lightbox').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function lbStep(dir) {
+    lbIndex = (lbIndex + dir + lbItems.length) % lbItems.length;
+    renderLightbox();
+  }
+
+  function renderLightbox() {
+    const item = lbItems[lbIndex];
+    document.getElementById('lbImg').src = item.src;
+    document.getElementById('lbImg').alt = item.alt;
+    document.getElementById('lbCaption').textContent = item.label;
+    document.getElementById('lbSub').textContent = item.cat + ' — ' + (lbIndex+1) + ' / ' + lbItems.length;
+  }
+
+  // Filter tabs
+  function filterGallery(cat) {
+    // Update active button
+    document.querySelectorAll('.gf-btn').forEach(btn => btn.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+
+    // Show/hide items and placeholders
+    document.querySelectorAll('.gallery-item, .gallery-placeholder').forEach(el => {
+      const elCat = el.getAttribute('data-cat');
+      el.classList.toggle('hidden', cat !== 'all' && elCat !== cat);
+    });
+  }
+
+  // Keyboard nav
+  document.addEventListener('keydown', e => {
+    const lb = document.getElementById('lightbox');
+    if (!lb?.classList.contains('open')) return;
+    if (e.key === 'Escape')     closeLightbox();
+    if (e.key === 'ArrowRight') lbStep(1);
+    if (e.key === 'ArrowLeft')  lbStep(-1);
+  });
+
+  // Assign onclick to each gallery item after page loads
+  document.addEventListener('DOMContentLoaded', () => {
+    let realIdx = 0;
+    document.querySelectorAll('.gallery-item[data-cat]').forEach(el => {
+      const idx = realIdx++;
+      el.onclick = () => openLightbox(idx);
+    });
+  });
+  // ══ END GALLERY LOGIC ══════════════════════════════════════════════════════
+
   </script>
 </body>
 </html>
