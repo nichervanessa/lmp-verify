@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About SHIRWAN IT — Solar, Internet & Security Systems</title>
+  <meta name="description" content="SHIRWAN IT provides professional Solar energy systems, Internet services, and CCTV security camera installation in Kurdistan Region, Iraq." />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+Arabic:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>" />
+
+  <style>
+    /* ── PAGE-SPECIFIC STYLES ── */
+    :root {
+      --gold:   #f59e0b;
+      --gold2:  #d97706;
+      --green:  #059669;
+      --green2: #047857;
+      --blue:   #1d4ed8;
+      --blue2:  #1e40af;
+    }
+
+    /* ── HERO ── */
+    .about-hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1e40af 100%);
+      padding: 140px 0 80px;
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+    }
+    .about-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(37,99,235,.35) 0%, transparent 70%);
+    }
+    .about-hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    .about-hero-content { position: relative; z-index: 1; }
+    .company-logo-big {
+      width: 90px; height: 90px;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border-radius: 24px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 24px;
+      box-shadow: 0 0 60px rgba(245,158,11,.4);
+    }
+    .company-logo-big svg { width: 50px; height: 50px; }
+    .about-hero h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 8px;
+      letter-spacing: -1px;
+    }
+    .about-hero h1 span { color: #f59e0b; }
+    .about-hero-tagline {
+      font-size: 1.1rem;
+      color: rgba(255,255,255,.7);
+      margin-bottom: 16px;
+      font-weight: 500;
+    }
+    .about-hero-badges {
+      display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+    .hero-badge-pill {
+      background: rgba(255,255,255,.1);
+      border: 1px solid rgba(255,255,255,.2);
+      color: #fff;
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex; align-items: center; gap: 6px;
+      backdrop-filter: blur(8px);
+    }
+    .about-hero-stats {
+      display: flex; gap: 0; justify-content: center;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 16px;
+      background: rgba(255,255,255,.06);
+      backdrop-filter: blur(10px);
+      max-width: 540px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .hero-stat-box {
+      flex: 1; padding: 18px 16px; text-align: center;
+      border-right: 1px solid rgba(255,255,255,.1);
+    }
+    .hero-stat-box:last-child { border-right: none; }
+    .hero-stat-box .num {
+      font-size: 1.6rem; font-weight: 900; color: #f59e0b; display: block;
+    }
+    .hero-stat-box .lbl {
+      font-size: 11px; color: rgba(255,255,255,.55); text-transform: uppercase; letter-spacing: .8px; margin-top: 2px;
+    }
+
+    /* ── SERVICES ── */
+    .services-section { padding: 90px 0; background: #fff; }
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 28px;
+      margin-top: 52px;
+    }
+    .service-card {
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+      transition: transform .25s, box-shadow .25s;
+      background: #fff;
+    }
+    .service-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 60px rgba(0,0,0,.1);
+    }
+    .service-card-top {
+      padding: 36px 28px 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .service-card-top::after {
+      content: '';
+      position: absolute;
+      bottom: -20px; right: -20px;
+      width: 100px; height: 100px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.15);
+    }
+    .sc-solar   .service-card-top { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .sc-internet .service-card-top { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+    .sc-camera  .service-card-top { background: linear-gradient(135deg, #059669, #047857); }
+
+    .service-icon {
+      width: 60px; height: 60px;
+      background: rgba(255,255,255,.2);
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 18px;
+    }
+    .service-icon svg { width: 32px; height: 32px; color: #fff; }
+    .service-card-top h3 { font-size: 1.35rem; font-weight: 800; color: #fff; margin-bottom: 6px; }
+    .service-card-top p  { font-size: 14px; color: rgba(255,255,255,.85); line-height: 1.6; }
+
+    .service-card-body { padding: 24px 28px; }
+    .service-features { list-style: none; margin: 0; padding: 0; }
+    .service-features li {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 9px 0;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 14px; color: #374151;
+      line-height: 1.5;
+    }
+    .service-features li:last-child { border-bottom: none; }
+    .feat-dot {
+      width: 20px; height: 20px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 1px;
+    }
+    .sc-solar   .feat-dot { background: #fef3c7; color: #d97706; }
+    .sc-internet .feat-dot { background: #dbeafe; color: #1d4ed8; }
+    .sc-camera  .feat-dot  { background: #d1fae5; color: #059669; }
+    .feat-dot svg { width: 12px; height: 12px; }
+
+    /* ── WHY CHOOSE US ── */
+    .why-section { padding: 90px 0; background: #f8fafc; }
+    .why-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      margin-top: 52px;
+    }
+    .why-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 28px 24px;
+      border: 1px solid #e2e8f0;
+      text-align: center;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .why-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,.07); }
+    .why-icon {
+      width: 56px; height: 56px;
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 16px;
+    }
+    .why-icon svg { width: 28px; height: 28px; }
+    .why-card h4 { font-size: 15px; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
+    .why-card p  { font-size: 13px; color: #64748b; line-height: 1.6; }
+
+    /* ── COVER AREA ── */
+    .coverage-section { padding: 90px 0; background: #fff; }
+    .coverage-banner {
+      background: linear-gradient(135deg, #0f172a, #1e3a8a);
+      border-radius: 24px;
+      padding: 56px 48px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 40px;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .coverage-banner::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 300px; height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(rgba(245,158,11,.25), transparent 70%);
+    }
+    .coverage-banner h2 {
+      font-size: 2rem; font-weight: 900; color: #fff; margin-bottom: 12px;
+    }
+    .coverage-banner p { font-size: 15px; color: rgba(255,255,255,.7); line-height: 1.7; max-width: 520px; }
+    .coverage-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+    .coverage-tag {
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.2);
+      color: #fff; padding: 5px 14px;
+      border-radius: 999px; font-size: 13px; font-weight: 500;
+    }
+    .coverage-contact {
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 16px;
+      padding: 28px 24px;
+      text-align: center;
+      min-width: 220px;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+    }
+    .coverage-contact h4 { color: #f59e0b; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 16px; }
+    .contact-item { display: flex; align-items: center; gap: 10px; color: #fff; font-size: 14px; margin-bottom: 12px; }
+    .contact-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: .7; }
+    .cta-call {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #fff; font-weight: 700; font-size: 14px;
+      padding: 12px 24px; border-radius: 12px;
+      text-decoration: none; margin-top: 16px;
+      transition: opacity .2s;
+    }
+    .cta-call:hover { opacity: .9; }
+
+    /* ── TESTIMONIAL / TRUST ── */
+    .trust-section { padding: 80px 0; background: #f8fafc; }
+    .trust-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 40px;
+    }
+    .trust-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 28px;
+      border: 1px solid #e2e8f0;
+    }
+    .trust-stars { color: #f59e0b; font-size: 18px; margin-bottom: 14px; letter-spacing: 2px; }
+    .trust-text { font-size: 14px; color: #374151; line-height: 1.7; margin-bottom: 16px; font-style: italic; }
+    .trust-author { display: flex; align-items: center; gap: 12px; }
+    .trust-avatar {
+      width: 40px; height: 40px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 800;
+      flex-shrink: 0;
+    }
+    .trust-name  { font-size: 14px; font-weight: 700; color: #0f172a; }
+    .trust-role  { font-size: 12px; color: #94a3b8; }
+
+    /* ── CTA BANNER ── */
+    .cta-section { padding: 80px 0; background: #fff; }
+    .cta-banner {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+      border-radius: 24px;
+      padding: 56px 48px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-banner::before {
+      content: '';
+      position: absolute;
+      top: -50px; left: 50%;
+      transform: translateX(-50%);
+      width: 300px; height: 300px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.1);
+    }
+    .cta-banner h2 { font-size: 2rem; font-weight: 900; color: #fff; margin-bottom: 12px; position: relative; }
+    .cta-banner p  { font-size: 16px; color: rgba(255,255,255,.85); margin-bottom: 32px; position: relative; }
+    .cta-buttons { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; position: relative; }
+    .cta-btn-white {
+      background: #fff; color: #d97706;
+      padding: 14px 28px; border-radius: 12px;
+      font-weight: 700; font-size: 15px;
+      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 8px;
+      transition: opacity .2s;
+    }
+    .cta-btn-outline {
+      background: transparent;
+      border: 2px solid rgba(255,255,255,.6);
+      color: #fff;
+      padding: 14px 28px; border-radius: 12px;
+      font-weight: 700; font-size: 15px;
+      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 8px;
+      transition: background .2s;
+    }
+    .cta-btn-outline:hover { background: rgba(255,255,255,.12); }
+
+    /* ── RTL support ── */
+    [dir="rtl"] .service-card-top::after { right: auto; left: -20px; }
+    [dir="rtl"] .coverage-banner::before { right: auto; left: -60px; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .coverage-banner { grid-template-columns: 1fr; }
+      .coverage-contact { min-width: auto; }
+      .about-hero { padding: 120px 0 60px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── NAV ── -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">
+        <div class="nav-logo-icon">
+          <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="4" y="10" width="32" height="22" rx="3" stroke="white" stroke-width="2.5"/>
+            <path d="M4 17h32" stroke="white" stroke-width="2.5"/>
+            <circle cx="10" cy="25" r="2" fill="white"/>
+            <rect x="16" y="23" width="14" height="4" rx="1.5" fill="white"/>
+            <path d="M14 6L20 3L26 6" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <div class="nav-logo-name">SHIRWAN IT</div>
+          <div class="nav-logo-sub">Solar · Internet · Cameras</div>
+        </div>
+      </a>
+      <div class="nav-links" id="navLinks">
+        <a href="index.html" class="nav-link">Invoice Verify</a>
+        <a href="#services" class="nav-link">Services</a>
+        <a href="#coverage" class="nav-link">Coverage</a>
+        <a href="#contact-section" class="nav-link">Contact</a>
+        <div class="lang-switcher">
+          <button onclick="setLang('en')" class="lang-btn active" id="btn-en">EN</button>
+          <button onclick="setLang('ar')" class="lang-btn" id="btn-ar">عر</button>
+          <button onclick="setLang('ku')" class="lang-btn" id="btn-ku">کو</button>
+        </div>
+      </div>
+      <button class="nav-burger" id="navBurger" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ── HERO ── -->
+  <section class="about-hero">
+    <div class="about-hero-grid"></div>
+    <div class="container about-hero-content">
+      <div class="company-logo-big">
+        <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Lightning bolt = energy/tech -->
+          <path d="M34 8L16 34h16L22 52l22-26H28L34 8z" fill="white" stroke="white" stroke-width="1" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h1>SHIRWAN <span>IT</span></h1>
+      <p class="about-hero-tagline">Solar Energy &nbsp;·&nbsp; Internet Services &nbsp;·&nbsp; Security Cameras</p>
+      <div class="about-hero-badges">
+        <div class="hero-badge-pill">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          Solar Systems
+        </div>
+        <div class="hero-badge-pill">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0114.08 0"/><path d="M1.42 9a16 16 0 0121.16 0"/><path d="M8.53 16.11a6 6 0 016.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+          Internet &amp; Networking
+        </div>
+        <div class="hero-badge-pill">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          CCTV &amp; Security
+        </div>
+        <div class="hero-badge-pill">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Kurdistan Region, Iraq
+        </div>
+      </div>
+      <div class="about-hero-stats">
+        <div class="hero-stat-box">
+          <span class="num">5+</span>
+          <span class="lbl">Years Experience</span>
+        </div>
+        <div class="hero-stat-box">
+          <span class="num">500+</span>
+          <span class="lbl">Projects Done</span>
+        </div>
+        <div class="hero-stat-box">
+          <span class="num">3</span>
+          <span class="lbl">Core Services</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── SERVICES ── -->
+  <section class="services-section" id="services">
+    <div class="container">
+      <div class="section-label">What We Do</div>
+      <h2 class="section-title">Our Services</h2>
+      <p class="section-desc">Professional installation and support for homes, businesses, and government facilities across the Kurdistan Region.</p>
+
+      <div class="services-grid">
+
+        <!-- Solar -->
+        <div class="service-card sc-solar">
+          <div class="service-card-top">
+            <div class="service-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="12" cy="12" r="5"/>
+                <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+              </svg>
+            </div>
+            <h3>Solar Energy Systems</h3>
+            <p>Clean, reliable power for homes and businesses — designed, installed and maintained by our certified team.</p>
+          </div>
+          <div class="service-card-body">
+            <ul class="service-features">
+              <li>
+                <span class="feat-dot sc-solar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                Residential rooftop solar panel installation
+              </li>
+              <li>
+                <span class="feat-dot sc-solar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                Commercial &amp; industrial solar systems
+              </li>
+              <li>
+                <span class="feat-dot sc-solar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                Battery storage &amp; inverter configuration
+              </li>
+              <li>
+                <span class="feat-dot sc-solar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                On-grid, off-grid &amp; hybrid setups
+              </li>
+              <li>
+                <span class="feat-dot sc-solar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                System monitoring &amp; periodic maintenance
+              </li>
+              <li>
+                <span class="feat-dot sc-solar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                Free site survey &amp; energy audit
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Internet -->
+        <div class="service-card sc-internet">
+          <div class="service-card-top">
+            <div class="service-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M5 12.55a11 11 0 0114.08 0"/>
+                <path d="M1.42 9a16 16 0 0121.16 0"/>
+                <path d="M8.53 16.11a6 6 0 016.95 0"/>
+                <line x1="12" y1="20" x2="12.01" y2="20"/>
+              </svg>
+            </div>
+            <h3>Internet &amp; Networking</h3>
+            <p>Fast, stable internet connectivity and complete network infrastructure for any scale of operation.</p>
+          </div>
+          <div class="service-card-body">
+            <ul class="service-features">
+              <li>
+                <span class="feat-dot sc-internet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                Fiber optic &amp; wireless internet installation
+              </li>
+              <li>
+                <span class="feat-dot sc-internet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                LAN / WAN network design &amp; cabling
+              </li>
+              <li>
+                <span class="feat-dot sc-internet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                WiFi coverage &amp; access point deployment
+              </li>
+              <li>
+                <span class="feat-dot sc-internet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                Router, switch &amp; firewall configuration
+              </li>
+              <li>
+                <span class="feat-dot sc-internet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                ISP-grade point-to-point wireless links
+              </li>
+              <li>
+                <span class="feat-dot sc-internet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                24/7 network monitoring &amp; support
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Cameras -->
+        <div class="service-card sc-camera">
+          <div class="service-card-top">
+            <div class="service-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+            </div>
+            <h3>Security Camera Systems</h3>
+            <p>Complete CCTV and IP camera solutions protecting homes, shops, warehouses and public spaces.</p>
+          </div>
+          <div class="service-card-body">
+            <ul class="service-features">
+              <li>
+                <span class="feat-dot sc-camera"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                HD &amp; 4K IP camera installation
+              </li>
+              <li>
+                <span class="feat-dot sc-camera"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                NVR / DVR setup &amp; configuration
+              </li>
+              <li>
+                <span class="feat-dot sc-camera"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                Indoor, outdoor &amp; PTZ camera systems
+              </li>
+              <li>
+                <span class="feat-dot sc-camera"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                Night vision &amp; motion detection cameras
+              </li>
+              <li>
+                <span class="feat-dot sc-camera"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                Remote viewing via mobile app
+              </li>
+              <li>
+                <span class="feat-dot sc-camera"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                Access control &amp; alarm integration
+              </li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── WHY CHOOSE US ── -->
+  <section class="why-section">
+    <div class="container">
+      <div class="section-label">Why SHIRWAN IT</div>
+      <h2 class="section-title">Built on Quality &amp; Trust</h2>
+      <div class="why-grid">
+
+        <div class="why-card">
+          <div class="why-icon" style="background:#fef3c7">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h4>Certified Technicians</h4>
+          <p>Our team holds professional certifications in solar energy, networking and security systems installations.</p>
+        </div>
+
+        <div class="why-card">
+          <div class="why-icon" style="background:#dbeafe">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1d4ed8" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <h4>Fast Response Time</h4>
+          <p>We respond to service requests within hours — not days. Same-day installation available for most services.</p>
+        </div>
+
+        <div class="why-card">
+          <div class="why-icon" style="background:#d1fae5">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <h4>Quality Guarantee</h4>
+          <p>All hardware comes with manufacturer warranty. Our workmanship is guaranteed for 12 months post-installation.</p>
+        </div>
+
+        <div class="why-card">
+          <div class="why-icon" style="background:#ede9fe">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+          <h4>Local Experts</h4>
+          <p>Based in Kurdistan Region — we understand local conditions, power infrastructure and customer needs deeply.</p>
+        </div>
+
+        <div class="why-card">
+          <div class="why-icon" style="background:#fce7f3">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#be185d" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+          </div>
+          <h4>Transparent Pricing</h4>
+          <p>No hidden fees. Every invoice is itemized, digitally signed and QR-verified on this very portal for your peace of mind.</p>
+        </div>
+
+        <div class="why-card">
+          <div class="why-icon" style="background:#fef3c7">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013 16.83a19.79 19.79 0 01-3.07-8.67A2 2 0 011.96 6H5a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 13.9a16 16 0 006.29 6.29l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 21v-.08"/></svg>
+          </div>
+          <h4>After-Sales Support</h4>
+          <p>We don't disappear after installation. Call us any time for technical support, system upgrades or maintenance visits.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── COVERAGE & CONTACT ── -->
+  <section class="coverage-section" id="coverage">
+    <div class="container">
+      <div class="coverage-banner">
+        <div style="position:relative;z-index:1">
+          <div class="section-label" style="color:rgba(255,255,255,.6);font-size:12px">Coverage Area</div>
+          <h2>Serving All of Kurdistan Region</h2>
+          <p>We operate across Erbil, Sulaymaniyah, Duhok and surrounding districts. From city apartments to remote rural farms — our teams reach you.</p>
+          <div class="coverage-tags">
+            <span class="coverage-tag">📍 Erbil</span>
+            <span class="coverage-tag">📍 Sulaymaniyah</span>
+            <span class="coverage-tag">📍 Duhok</span>
+            <span class="coverage-tag">📍 Halabja</span>
+            <span class="coverage-tag">📍 Zakho</span>
+            <span class="coverage-tag">📍 Ranya</span>
+            <span class="coverage-tag">📍 Kalar</span>
+            <span class="coverage-tag">+ more districts</span>
+          </div>
+        </div>
+        <div class="coverage-contact" id="contact-section">
+          <h4>Get In Touch</h4>
+          <div class="contact-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013 16.83a19.79 19.79 0 01-3.07-8.67A2 2 0 011.96 6H5a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 13.9a16 16 0 006.29 6.29l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 21v-.08"/></svg>
+            +964 750 428 5314
+          </div>
+          <div class="contact-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            shirwan.it@gmail.com
+          </div>
+          <div class="contact-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Kurdistan Region, Iraq
+          </div>
+          <a href="tel:+9647504285314" class="cta-call">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013 16.83a19.79 19.79 0 01-3.07-8.67A2 2 0 011.96 6H5a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 13.9a16 16 0 006.29 6.29l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 21v-.08"/></svg>
+            Call Us Now
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── TESTIMONIALS ── -->
+  <section class="trust-section">
+    <div class="container">
+      <div class="section-label">Customer Feedback</div>
+      <h2 class="section-title">What Our Clients Say</h2>
+      <div class="trust-grid">
+        <div class="trust-card">
+          <div class="trust-stars">★★★★★</div>
+          <p class="trust-text">"SHIRWAN IT installed our solar system in one day. The team was professional, clean and explained everything clearly. Our electricity bill dropped by 80%."</p>
+          <div class="trust-author">
+            <div class="trust-avatar" style="background:#fef3c7;color:#d97706">A</div>
+            <div>
+              <div class="trust-name">Ahmed Hassan</div>
+              <div class="trust-role">Homeowner, Erbil</div>
+            </div>
+          </div>
+        </div>
+        <div class="trust-card">
+          <div class="trust-stars">★★★★★</div>
+          <p class="trust-text">"We had WiFi dead zones across our office building. SHIRWAN IT designed and installed a full access point system — full coverage everywhere now."</p>
+          <div class="trust-author">
+            <div class="trust-avatar" style="background:#dbeafe;color:#1d4ed8">S</div>
+            <div>
+              <div class="trust-name">Saman Karimi</div>
+              <div class="trust-role">Business Owner, Sulaymaniyah</div>
+            </div>
+          </div>
+        </div>
+        <div class="trust-card">
+          <div class="trust-stars">★★★★★</div>
+          <p class="trust-text">"The camera system they installed covers all angles of my shop. I can watch the live feed from my phone anywhere. Excellent service and fair price."</p>
+          <div class="trust-author">
+            <div class="trust-avatar" style="background:#d1fae5;color:#059669">K</div>
+            <div>
+              <div class="trust-name">Karwan Mahmoud</div>
+              <div class="trust-role">Shop Owner, Duhok</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CTA BANNER ── -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-banner">
+        <h2>Ready to Get Started?</h2>
+        <p>Contact us today for a free consultation and site survey — no obligation, no cost.</p>
+        <div class="cta-buttons">
+          <a href="tel:+9647504285314" class="cta-btn-white">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013 16.83a19.79 19.79 0 01-3.07-8.67A2 2 0 011.96 6H5a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 13.9a16 16 0 006.29 6.29l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 21v-.08"/></svg>
+            Call +964 750 428 5314
+          </a>
+          <a href="mailto:shirwan.it@gmail.com" class="cta-btn-outline">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Send Email
+          </a>
+          <a href="index.html" class="cta-btn-outline">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
+            Verify an Invoice
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <div class="nav-logo-icon small">
+          <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="4" y="10" width="32" height="22" rx="3" stroke="white" stroke-width="2.5"/>
+            <path d="M4 17h32" stroke="white" stroke-width="2.5"/>
+            <circle cx="10" cy="25" r="2" fill="white"/>
+            <rect x="16" y="23" width="14" height="4" rx="1.5" fill="white"/>
+          </svg>
+        </div>
+        <div>
+          <div class="footer-brand-name">SHIRWAN IT</div>
+          <div class="footer-brand-sub">Solar · Internet · Security Cameras</div>
+        </div>
+      </div>
+      <div class="footer-links">
+        <a href="#services">Services</a>
+        <a href="#coverage">Coverage</a>
+        <a href="index.html">Verify Invoice</a>
+        <a href="mailto:shirwan.it@gmail.com">Contact</a>
+      </div>
+      <div class="footer-copy">
+        © 2025 SHIRWAN IT — Kurdistan Region, Iraq &nbsp;|&nbsp; Built by BlackCode Soft Company LTD
+      </div>
+    </div>
+  </footer>
+
+  <!-- Minimal i18n for nav buttons -->
+  <script>
+    function setLang(lang) {
+      const isRTL = lang === 'ar' || lang === 'ku';
+      document.documentElement.setAttribute('lang', lang);
+      document.documentElement.setAttribute('dir', isRTL ? 'rtl' : 'ltr');
+      ['en','ar','ku'].forEach(l => {
+        document.getElementById(`btn-${l}`)?.classList.toggle('active', l === lang);
+      });
+      localStorage.setItem('verify_lang', lang);
+    }
+    // Restore saved lang
+    const saved = localStorage.getItem('verify_lang') || 'en';
+    if (saved !== 'en') setLang(saved);
+
+    // Nav scroll
+    window.addEventListener('scroll', () => {
+      document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 20);
+    });
+  </script>
+</body>
+</html>
