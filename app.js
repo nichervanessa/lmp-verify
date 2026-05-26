@@ -1,7 +1,8 @@
-// app.js — Main application logic
+// app.js — Main application logic with Auth gating
 
 let html5QrCode = null;
 window._scannerRunning = false;
+let currentUser = null; // Firebase auth user
 
 // ── On load ────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
@@ -20,6 +21,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Enter key support
   input?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') verifyInvoice();
+  });
+
+  // Login password enter key
+  document.getElementById('loginPassword')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') doLogin();
+  });
+  document.getElementById('loginEmail')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('loginPassword').focus();
   });
 
   // Auto-fill from URL ?code=INV-...
@@ -42,9 +51,117 @@ document.addEventListener('DOMContentLoaded', async () => {
     else if (el) el.textContent = '100+';
   } catch { /* ignore */ }
 
-  // Restore recent verifications from localStorage
+  // Restore recent verifications
   renderRecentChecks();
+
+  // Watch Firebase Auth state
+  firebase.auth().onAuthStateChanged((user) => {
+    currentUser = user;
+    updateNavAuth(user);
+  });
 });
+
+// ── Auth UI ────────────────────────────────────────────────────────────────
+function updateNavAuth(user) {
+  const btn   = document.getElementById('navAuthBtn');
+  const label = document.getElementById('navAuthLabel');
+  if (!btn || !label) return;
+
+  if (user) {
+    // Logged in: show email initial + Logout
+    const initials = (user.displayName || user.email || '?').charAt(0).toUpperCase();
+    label.textContent = initials + ' Logout';
+    btn.classList.add('logged-in');
+  } else {
+    label.textContent = 'Login';
+    btn.classList.remove('logged-in');
+  }
+}
+
+function handleAuthClick() {
+  if (currentUser) {
+    firebase.auth().signOut().then(() => showToast('Logged out successfully'));
+  } else {
+    openLoginModal();
+  }
+}
+
+function openLoginModal() {
+  const modal = document.getElementById('loginModal');
+  modal.classList.add('open');
+  document.getElementById('loginEmail')?.focus();
+  document.getElementById('loginError').style.display = 'none';
+}
+
+function closeLoginModal() {
+  document.getElementById('loginModal').classList.remove('open');
+}
+
+// Close modal on overlay click
+document.getElementById('loginModal')?.addEventListener('click', (e) => {
+  if (e.target === document.getElementById('loginModal')) closeLoginModal();
+});
+
+function togglePw() {
+  const pw = document.getElementById('loginPassword');
+  const btn = document.getElementById('pwToggle');
+  if (pw.type === 'password') {
+    pw.type = 'text';
+    btn.textContent = '🙈';
+  } else {
+    pw.type = 'password';
+    btn.textContent = '👁';
+  }
+}
+
+async function doLogin() {
+  const email    = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errEl    = document.getElementById('loginError');
+  const btn      = document.getElementById('loginBtn');
+  const spinner  = document.getElementById('loginSpinner');
+  const btnText  = document.getElementById('loginBtnText');
+
+  errEl.style.display = 'none';
+  if (!email || !password) {
+    errEl.textContent = 'Please enter your email and password.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  btnText.style.display = 'none';
+  spinner.style.display = 'block';
+
+  try {
+    await firebase.auth().signInWithEmailAndPassword(email, password);
+    closeLoginModal();
+    showToast('Welcome back! You are now logged in.');
+    // Re-render current result if any
+    const resultArea = document.getElementById('resultArea');
+    if (resultArea.style.display !== 'none' && resultArea.dataset.invoiceData) {
+      try {
+        const d = JSON.parse(resultArea.dataset.invoiceData);
+        showResult({ found: true, data: d }, d.invoiceNumber);
+      } catch {}
+    }
+  } catch (err) {
+    let msg = 'Login failed. Please check your credentials.';
+    if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+      msg = 'Incorrect email or password.';
+    } else if (err.code === 'auth/too-many-requests') {
+      msg = 'Too many attempts. Please try again later.';
+    } else if (err.code === 'auth/invalid-email') {
+      msg = 'Please enter a valid email address.';
+    }
+    errEl.textContent = msg;
+    errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btnText.style.display = 'inline';
+    spinner.style.display = 'none';
+  }
+}
 
 // ── Tab switching ──────────────────────────────────────────────────────────
 function switchTab(tab) {
@@ -52,8 +169,6 @@ function switchTab(tab) {
     document.getElementById(`tab-${t}`)?.classList.toggle('active', t === tab);
     document.getElementById(`pane-${t}`)?.classList.toggle('active', t === tab);
   });
-
-  // Stop scanner when switching away
   if (tab !== 'scan' && window._scannerRunning) stopScanner();
 }
 
@@ -62,12 +177,21 @@ function toggleNav() {
   document.getElementById('navLinks')?.classList.toggle('open');
 }
 
+// Close nav on link click (mobile)
+document.querySelectorAll('.nav-link').forEach(link => {
+  link.addEventListener('click', () => {
+    document.getElementById('navLinks')?.classList.remove('open');
+  });
+});
+
 // ── Clear input ────────────────────────────────────────────────────────────
 function clearInput() {
   const input = document.getElementById('invoiceInput');
   input.value = '';
   document.getElementById('clearBtn').style.display = 'none';
-  document.getElementById('resultArea').style.display = 'none';
+  const ra = document.getElementById('resultArea');
+  ra.style.display = 'none';
+  delete ra.dataset.invoiceData;
   input.focus();
 }
 
@@ -77,13 +201,13 @@ async function verifyInvoice(codeOverride) {
   const code  = (codeOverride || input?.value || '').trim();
 
   if (!code) {
-    showToast(t('verify.placeholder') || 'Please enter an invoice number');
+    showToast('Please enter an invoice number');
     input?.focus();
     return;
   }
 
-  // Set loading state
-  const btn = document.getElementById('verifyBtn');
+  // Loading state
+  const btn     = document.getElementById('verifyBtn');
   const btnText = document.getElementById('verifyBtnText');
   const spinner = document.getElementById('btnSpinner');
   if (btn) btn.disabled = true;
@@ -96,8 +220,6 @@ async function verifyInvoice(codeOverride) {
   try {
     const result = await lookupInvoice(code);
     await showResult(result, code);
-
-    // Save to recent
     saveRecentCheck(code, result.found);
     renderRecentChecks();
   } catch (err) {
@@ -110,18 +232,85 @@ async function verifyInvoice(codeOverride) {
   }
 }
 
-// ── Render result card ─────────────────────────────────────────────────────
+// ── Result card ────────────────────────────────────────────────────────────
 async function showResult(result, code) {
   const area = document.getElementById('resultArea');
   area.style.display = 'block';
 
   if (result.found) {
     const d = result.data;
-    const typeLabel = getTypeLabel(d.type);
-    const typeBadgeClass = `type-${d.type || 'payment'}`;
 
-    // Increment verification counter
+    // Cache invoice data for re-render after login
+    area.dataset.invoiceData = JSON.stringify(d);
+
+    const typeLabel      = getTypeLabel(d.type);
+    const typeBadgeClass = `type-${d.type || 'payment'}`;
+    const isStaff        = !!currentUser;
+
+    // Increment verification counter (non-blocking)
     if (d.id) recordVerification(d.id);
+
+    // Public info always visible
+    // Staff info: full grid visible; guest: blurred + login prompt
+    const staffGrid = `
+      <div class="result-grid ${!isStaff ? 'staff-only-blur' : ''}">
+        <div class="result-field">
+          <label>${t('result.invoice')}</label>
+          <span style="font-family:monospace;font-size:12px">${d.invoiceNumber || code}</span>
+        </div>
+        <div class="result-field">
+          <label>${t('result.customer')}</label>
+          <span>${d.customer?.name || d.customerName || '—'}</span>
+        </div>
+        ${getAmountField(d)}
+        <div class="result-field">
+          <label>${t('result.date')}</label>
+          <span>${formatDate(d.date || d.createdAt || d.data?.date)}</span>
+        </div>
+        <div class="result-field">
+          <label>${t('result.company')}</label>
+          <span>${d.company?.name || 'Loan Management Pro'}</span>
+        </div>
+        <div class="result-field">
+          <label>${t('result.created')}</label>
+          <span>${formatDate(d.createdAt || d.issuedAt)}</span>
+        </div>
+        ${d.verificationCount !== undefined ? `
+        <div class="result-field">
+          <label>${t('result.verifyCount')}</label>
+          <span>${(d.verificationCount + 1).toLocaleString()}</span>
+        </div>` : ''}
+        ${getStatusField(d)}
+      </div>
+    `;
+
+    const staffActions = isStaff ? `
+      <div class="result-actions" style="flex-wrap:wrap;gap:8px">
+        <button class="result-btn primary" onclick="viewFullInvoice(${JSON.stringify(d).replace(/"/g, '&quot;')})" style="flex:2;min-width:160px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          View Full Invoice
+        </button>
+        <button class="result-btn primary" onclick="printFullInvoice(${JSON.stringify(d).replace(/"/g, '&quot;')})" style="flex:1;min-width:120px;background:#0f766e">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Print
+        </button>
+        <button class="result-btn ghost" onclick="downloadVerificationReport(${JSON.stringify(d).replace(/"/g, '&quot;')})" style="flex:1;min-width:120px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download
+        </button>
+        <button class="result-btn ghost" onclick="clearInput();" style="flex:1;min-width:120px">
+          Verify Another
+        </button>
+      </div>
+    ` : `
+      <div class="staff-unlock-banner">
+        <p>🔐 Staff login required to view full invoice details, print, or download.</p>
+        <button onclick="openLoginModal()">Login to View Full Invoice</button>
+      </div>
+      <div style="padding:10px 18px 18px">
+        <button class="result-btn ghost" style="width:100%" onclick="clearInput();">Verify Another Invoice</button>
+      </div>
+    `;
 
     area.innerHTML = `
       <div class="result-card success">
@@ -133,67 +322,22 @@ async function showResult(result, code) {
           </div>
           <div>
             <div class="result-title">${t('result.verified')}</div>
-            <div class="result-subtitle">${t('result.verifiedSub')} <strong>${d.company?.name || d.companyName || 'Loan Management Pro'}</strong></div>
+            <div class="result-subtitle">${t('result.verifiedSub')} <strong>${d.company?.name || 'Loan Management Pro'}</strong></div>
           </div>
           <div style="margin-left:auto">
             <span class="type-badge ${typeBadgeClass}">${typeLabel}</span>
           </div>
         </div>
 
-        <div class="result-grid">
-          <div class="result-field">
-            <label>${t('result.invoice')}</label>
-            <span style="font-family:monospace;font-size:12px">${d.invoiceNumber || code}</span>
-          </div>
-          <div class="result-field">
-            <label>${t('result.customer')}</label>
-            <span>${d.customer?.name || d.customerName || '—'}</span>
-          </div>
-          ${getAmountField(d)}
-          <div class="result-field">
-            <label>${t('result.date')}</label>
-            <span>${formatDate(d.date || d.createdAt || d.data?.date)}</span>
-          </div>
-          <div class="result-field">
-            <label>${t('result.company')}</label>
-            <span>${d.company?.name || d.companyName || 'Loan Management Pro'}</span>
-          </div>
-          <div class="result-field">
-            <label>${t('result.created')}</label>
-            <span>${formatDate(d.createdAt || d.issuedAt)}</span>
-          </div>
-          ${d.verificationCount !== undefined ? `
-          <div class="result-field">
-            <label>${t('result.verifyCount')}</label>
-            <span>${(d.verificationCount + 1).toLocaleString()}</span>
-          </div>` : ''}
-          ${getStatusField(d)}
-        </div>
-
-        <div class="result-actions" style="flex-wrap:wrap;gap:8px">
-          <button class="result-btn primary" onclick="viewFullInvoice(${JSON.stringify(d).replace(/"/g, '&quot;')})" style="flex:2;min-width:160px">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            View Full Invoice
-          </button>
-          <button class="result-btn primary" onclick="printFullInvoice(${JSON.stringify(d).replace(/"/g, '&quot;')})" style="flex:1;min-width:120px;background:#0f766e">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-            Print
-          </button>
-          <button class="result-btn ghost" onclick="downloadVerificationReport(${JSON.stringify(d).replace(/"/g, '&quot;')})" style="flex:1;min-width:120px">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Download
-          </button>
-          <button class="result-btn ghost" onclick="clearInput(); document.getElementById('invoiceInput').focus();" style="flex:1;min-width:120px">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
-            Verify Another
-          </button>
-        </div>
+        ${staffGrid}
+        ${staffActions}
       </div>
     `;
+
   } else {
     area.innerHTML = `
       <div class="result-card error">
-        <div class="result-header">
+        <div class="result-header" style="background:var(--red-100);border-color:rgba(239,68,68,0.2)">
           <div class="result-icon err">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <circle cx="12" cy="12" r="10"/>
@@ -206,13 +350,15 @@ async function showResult(result, code) {
             <div class="result-subtitle">${t('result.notFoundSub')}</div>
           </div>
         </div>
-        <p style="color:#64748b;font-size:14px;margin-bottom:16px">
-          Code searched: <code style="background:#f1f5f9;padding:2px 8px;border-radius:6px;font-size:13px">${escapeHtml(code)}</code>
-        </p>
-        <div class="result-actions">
-          <button class="result-btn ghost" onclick="clearInput(); document.getElementById('invoiceInput').focus();">
-            ${t('result.verifyAnotherBtn')}
-          </button>
+        <div style="padding:16px 18px;background:var(--white)">
+          <p style="color:#64748b;font-size:14px;margin-bottom:16px">
+            Code searched: <code style="background:#f1f5f9;padding:2px 8px;border-radius:6px;font-size:13px">${escapeHtml(code)}</code>
+          </p>
+          <div class="result-actions">
+            <button class="result-btn ghost" onclick="clearInput()">
+              ${t('result.verifyAnotherBtn')}
+            </button>
+          </div>
         </div>
       </div>
     `;
@@ -221,7 +367,7 @@ async function showResult(result, code) {
   area.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-// ── Amount field helper ────────────────────────────────────────────────────
+// ── Amount & Status helpers ────────────────────────────────────────────────
 function getAmountField(d) {
   let amount = null;
   if (d.data?.amount) amount = d.data.amount;
@@ -250,8 +396,7 @@ function getTypeLabel(type) {
   return map[type] || type || 'Invoice';
 }
 
-
-// ── Build full invoice HTML from Firebase data (mirrors desktop app output) ──
+// ── Full invoice HTML builder ──────────────────────────────────────────────
 function buildInvoiceHtmlFromData(d) {
   const fmtN = n => Number(n||0).toLocaleString('en-IQ',{minimumFractionDigits:0,maximumFractionDigits:0});
   const fmtD = s => {
@@ -286,9 +431,6 @@ function buildInvoiceHtmlFromData(d) {
       <tr><td>Total Paid</td><td>${fmtN(sd.totalPaid)} IQD</td></tr>
       <tr><td>Remaining</td><td>${fmtN(sd.remaining)} IQD</td></tr>
     `;
-  } else if (d.type === 'custom') {
-    rows = `<tr class="hl"><td>Total</td><td>${fmtN(sd.total)} ${d.currency||'IQD'}</td></tr>
-            <tr><td>Items</td><td>${sd.itemCount||'—'}</td></tr>`;
   } else {
     rows = `<tr class="hl"><td>Total Portfolio</td><td>${fmtN(sd.totalAmount)} IQD</td></tr>
             <tr><td>Total Loans</td><td>${sd.totalLoans||0}</td></tr>`;
@@ -298,22 +440,21 @@ function buildInvoiceHtmlFromData(d) {
 <html lang="en"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${d.invoiceNumber}</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 @page{size:A4;margin:0}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#fff;color:#1e293b;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .page{width:210mm;min-height:297mm;margin:0 auto;display:flex;flex-direction:column}
 .stripe{height:5px;background:linear-gradient(90deg,${primary},${accent})}
-.v-banner{background:#f0fdf4;border-bottom:2px solid #86efac;padding:9px 36px;display:flex;align-items:center;gap:10px;font-size:12px;color:#166534;font-weight:600}
+.v-banner{background:#f0fdf4;border-bottom:2px solid #86efac;padding:9px 36px;display:flex;align-items:center;gap:10px;font-size:12px;color:#166534;font-weight:700}
 .hdr{padding:24px 36px 18px;display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid #f1f5f9}
 .co-circle{width:44px;height:44px;border-radius:11px;background:linear-gradient(135deg,${primary},${accent});display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.co-circle svg{width:22px;height:22px}
 .co-name{font-size:15px;font-weight:800;color:#0f172a;margin-bottom:2px}
 .co-line{font-size:9px;color:#94a3b8;margin:1px 0}
 .inv-lbl{font-size:28px;font-weight:900;letter-spacing:3px;color:${primary};display:block;margin-bottom:6px}
 .pill{display:inline-flex;align-items:center;gap:5px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:3px 9px;font-size:9.5px;color:#475569;margin:2px 0;white-space:nowrap}
-.pill b{color:#0f172a;font-weight:600}
+.pill b{color:#0f172a;font-weight:700}
 .body{flex:1;padding:20px 36px}
 .billing{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
 .bc{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px;border-left:3px solid ${accent}}
@@ -346,12 +487,11 @@ tr.hl td{background:#eff6ff;color:#1d4ed8}
 <div class="hdr">
   <div style="display:flex;align-items:flex-start;gap:12px">
     <div class="co-circle">
-      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 32 32" fill="none" width="22" height="22" xmlns="http://www.w3.org/2000/svg">
         <rect x="3" y="9" width="26" height="18" rx="3" stroke="white" stroke-width="1.8"/>
         <path d="M3 15h26" stroke="white" stroke-width="1.8"/>
         <circle cx="8" cy="22" r="1.5" fill="white"/>
         <rect x="13" y="20.5" width="11" height="3" rx="1" fill="white"/>
-        <path d="M10 6L16 3L22 6" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
       </svg>
     </div>
     <div>
@@ -405,12 +545,14 @@ tr.hl td{background:#eff6ff;color:#1d4ed8}
 </body></html>`;
 }
 
-// View invoice in a modal overlay on the page
+// ── View invoice in overlay (staff only) ──────────────────────────────────
 function viewFullInvoice(data) {
+  if (!currentUser) { openLoginModal(); return; }
   if (typeof data === 'string') { try { data = JSON.parse(data); } catch { return; } }
+
   const overlay = document.createElement('div');
   overlay.id = '__inv_overlay__';
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;flex-direction:column;';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9999;display:flex;flex-direction:column;';
   overlay.innerHTML = `
     <div style="background:#1e293b;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
       <div style="color:#fff;font-weight:600;font-size:14px">📄 ${data.invoiceNumber}</div>
@@ -437,8 +579,9 @@ function viewFullInvoice(data) {
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
 }
 
-// Print invoice directly (no popup — uses hidden iframe)
+// ── Print invoice ──────────────────────────────────────────────────────────
 function printFullInvoice(data) {
+  if (!currentUser) { openLoginModal(); return; }
   if (typeof data === 'string') { try { data = JSON.parse(data); } catch { return; } }
   const html = buildInvoiceHtmlFromData(data);
   const old = document.getElementById('__inv_print_iframe__');
@@ -460,18 +603,17 @@ function printFullInvoice(data) {
 
 // ── Download verification report ───────────────────────────────────────────
 function downloadVerificationReport(data) {
-  if (typeof data === 'string') {
-    try { data = JSON.parse(data); } catch { return; }
-  }
+  if (!currentUser) { openLoginModal(); return; }
+  if (typeof data === 'string') { try { data = JSON.parse(data); } catch { return; } }
   const isRTL = currentLang === 'ar' || currentLang === 'ku';
   const html = `<!DOCTYPE html>
 <html lang="${currentLang}" dir="${isRTL ? 'rtl' : 'ltr'}">
 <head>
   <meta charset="UTF-8">
   <title>Verification Report — ${data.invoiceNumber || ''}</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Noto+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Noto Sans Arabic', Arial, sans-serif; background: #f8fafc; color: #1e293b; padding: 32px; direction: ${isRTL ? 'rtl' : 'ltr'}; }
+    body { font-family: 'Plus Jakarta Sans', 'Noto Sans Arabic', sans-serif; background: #f8fafc; color: #1e293b; padding: 32px; direction: ${isRTL ? 'rtl' : 'ltr'}; }
     .card { background: white; border-radius: 16px; padding: 32px; max-width: 600px; margin: 0 auto; border: 2px solid #86efac; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
     .badge { background: #dcfce7; color: #166534; padding: 10px 20px; border-radius: 10px; font-size: 16px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 24px; }
     h1 { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
@@ -492,13 +634,13 @@ function downloadVerificationReport(data) {
     <p class="sub">${t('result.verifiedSub')} <strong>${data.company?.name || 'Loan Management Pro'}</strong></p>
     <div class="inv-num">${data.invoiceNumber || ''}</div>
     <div class="grid">
-      <div class="field"><label>${t('result.customer')}</label><span>${data.customer?.name || data.customerName || '—'}</span></div>
+      <div class="field"><label>${t('result.customer')}</label><span>${data.customer?.name || '—'}</span></div>
       <div class="field"><label>${t('result.type')}</label><span>${getTypeLabel(data.type)}</span></div>
       <div class="field"><label>${t('result.created')}</label><span>${formatDate(data.createdAt)}</span></div>
       <div class="field"><label>${t('result.company')}</label><span>${data.company?.name || 'Loan Management Pro'}</span></div>
     </div>
     <div class="footer">
-      Verified on ${new Date().toLocaleString()} via loanmanagementpro verification portal<br>
+      Verified on ${new Date().toLocaleString()} via verify.amezona.com<br>
       This report confirms the authenticity of the above invoice.
     </div>
   </div>
@@ -511,38 +653,25 @@ function downloadVerificationReport(data) {
 
 // ── QR Scanner ─────────────────────────────────────────────────────────────
 async function toggleScanner() {
-  if (window._scannerRunning) {
-    stopScanner();
-  } else {
-    startScanner();
-  }
+  if (window._scannerRunning) { stopScanner(); } else { startScanner(); }
 }
 
 async function startScanner() {
-  if (!window.Html5Qrcode) {
-    showToast('QR scanner library not loaded.');
-    return;
-  }
-
+  if (!window.Html5Qrcode) { showToast('QR scanner library not loaded.'); return; }
   try {
     html5QrCode = new Html5Qrcode('qr-reader');
     await html5QrCode.start(
       { facingMode: 'environment' },
       { fps: 10, qrbox: { width: 220, height: 220 } },
       (decodedText) => {
-        // Extract invoice number from URL or use raw text
         let code = decodedText;
         try {
           const url = new URL(decodedText);
-          const pathParts = url.pathname.split('/');
-          code = pathParts[pathParts.length - 1] || decodedText;
-          // Also check query params
-          code = url.searchParams.get('code') || url.searchParams.get('invoice') || code;
-        } catch { /* not a URL — use as-is */ }
-
+          code = url.searchParams.get('code') || url.searchParams.get('invoice') ||
+                 url.pathname.split('/').pop() || decodedText;
+        } catch { /* not a URL */ }
         stopScanner();
         switchTab('manual');
-
         const input = document.getElementById('invoiceInput');
         if (input) {
           input.value = code;
@@ -550,9 +679,8 @@ async function startScanner() {
         }
         verifyInvoice(code);
       },
-      () => { /* frame errors — ignore */ }
+      () => { /* frame errors ignored */ }
     );
-
     window._scannerRunning = true;
     document.getElementById('scanBtnText').textContent = t('verify.stopCamera');
     document.getElementById('scanToggleBtn').style.background = '#dc2626';
@@ -574,7 +702,7 @@ function stopScanner() {
   if (scanText) scanText.textContent = t('verify.startCamera');
 }
 
-// ── Recent verifications (localStorage) ───────────────────────────────────
+// ── Recent verifications ───────────────────────────────────────────────────
 function saveRecentCheck(code, found) {
   try {
     const stored = JSON.parse(localStorage.getItem('recent_verifications') || '[]');
@@ -587,11 +715,9 @@ function renderRecentChecks() {
   try {
     const stored = JSON.parse(localStorage.getItem('recent_verifications') || '[]');
     if (!stored.length) return;
-
     const container = document.getElementById('recentChecks');
-    const list = document.getElementById('recentList');
+    const list      = document.getElementById('recentList');
     if (!container || !list) return;
-
     container.style.display = 'block';
     list.innerHTML = stored.map(item => `
       <div class="recent-item" onclick="verifyInvoice('${escapeHtml(item.code)}')">
@@ -607,7 +733,6 @@ function renderRecentChecks() {
 function formatDate(val) {
   if (!val) return '—';
   try {
-    // Firestore Timestamp object
     if (val && typeof val === 'object' && val.seconds) {
       return new Date(val.seconds * 1000).toLocaleDateString(
         currentLang === 'ar' || currentLang === 'ku' ? 'ar-IQ' : 'en-US',
@@ -633,11 +758,8 @@ function timeAgo(ts) {
 
 function escapeHtml(str) {
   return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 function showToast(msg, duration = 3000) {
