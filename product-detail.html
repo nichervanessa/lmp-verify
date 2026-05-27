@@ -1,1 +1,111 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Product Details — Loan Management Pro</title>
 
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">
+        <div class="nav-logo-icon">
+          <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="4" y="10" width="32" height="22" rx="3" stroke="white" stroke-width="2.5"/>
+            <path d="M4 17h32" stroke="white" stroke-width="2.5"/>
+          </svg>
+        </div>
+        <div>
+          <div class="nav-logo-name">Loan Management Pro</div>
+          <div class="nav-logo-sub" data-i18n="nav.products">Products</div>
+        </div>
+      </a>
+
+      <div class="nav-links" id="navLinks">
+        <a href="index.html" class="nav-link" data-i18n="nav.home">Home</a>
+        <a href="my-loans.html" class="nav-link" data-i18n="nav.myLoans">My Loans</a>
+        <a href="products.html" class="nav-link active" data-i18n="nav.products">Products</a>
+        <a href="index.html#about" class="nav-link" data-i18n="nav.about">About</a>
+
+        <div class="lang-switcher">
+          <button onclick="setLang('en')" class="lang-btn active" id="btn-en">EN</button>
+          <button onclick="setLang('ar')" class="lang-btn" id="btn-ar">عر</button>
+          <button onclick="setLang('ku')" class="lang-btn" id="btn-ku">کو</button>
+        </div>
+      </div>
+      <button class="nav-burger" id="navBurger" onclick="toggleNav()" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <section class="container product-detail-section">
+    <a href="products.html" class="back-link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      <span data-i18n="products.backToList">Back to Products</span>
+    </a>
+
+    <div class="loading-card" id="loadingDetail">
+      <div class="big-spinner"></div>
+      <p data-i18n="products.loading">Loading…</p>
+    </div>
+
+    <div class="product-detail" id="productDetail" style="display:none">
+      <!-- Big image slideshow -->
+      <div class="detail-slideshow">
+        <div class="detail-slides" id="detailSlides"></div>
+        <button class="slider-arrow slider-prev" id="detailPrev" onclick="slidePrev()">‹</button>
+        <button class="slider-arrow slider-next" id="detailNext" onclick="slideNext()">›</button>
+        <span class="detail-img-count" id="detailImgCount">1 / 1</span>
+      </div>
+
+      <!-- Thumbnails -->
+      <div class="detail-thumbs" id="detailThumbs"></div>
+
+      <!-- Product info -->
+      <div class="detail-info">
+        <span class="detail-category" id="detailCategory"></span>
+        <h1 class="detail-name" id="detailName"></h1>
+        <p class="detail-short" id="detailShort"></p>
+        <div class="detail-price-box">
+          <span class="detail-price-label" data-i18n="products.price">Price</span>
+          <span class="detail-price" id="detailPrice"></span>
+        </div>
+        <div class="detail-full" id="detailFull"></div>
+        <div class="detail-contact">
+          <p data-i18n="products.contactHint">📞 Interested? Contact us to order:</p>
+          <a href="tel:+9647504285314" class="primary-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+            <span>+964 750 428 5314</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-loans" id="detailNotFound" style="display:none">
+      <p data-i18n="products.notFound">Product not found.</p>
+      <a href="products.html" class="primary-btn" data-i18n="products.backToList">Back to Products</a>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2026 Loan Management Pro. <span data-i18n="footer.rights">All rights reserved.</span></p>
+    </div>
+  </footer>
+
+  <script src="firebase-config.js"></script>
+  <script src="i18n.js"></script>
+  <script src="product-detail.js"></script>
+</body>
+</html>
