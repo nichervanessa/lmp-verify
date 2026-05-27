@@ -1,15 +1,25 @@
-// admin-products.js — Auth-gated product management
-// Handles: Firebase Auth gate, drag-and-drop image upload to Firebase Storage,
-// Firestore create/update/delete for products collection.
+// admin-products.js
+// Images are uploaded to GitHub repo: nichervanessa/lmp-verify → gallery/
+// Public URL pattern: https://raw.githubusercontent.com/nichervanessa/lmp-verify/main/gallery/FILENAME
+// Product metadata (name, price, category, image URLs) saved to Firestore.
+// Firebase Storage is NOT used at all.
 
-const storage = firebase.storage();
+const GITHUB_OWNER  = 'nichervanessa';
+const GITHUB_REPO   = 'lmp-verify';
+const GITHUB_BRANCH = 'main';
+const GITHUB_FOLDER = 'gallery';
+const RAW_BASE      = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_FOLDER}`;
 
 // ─── State ─────────────────────────────────────────────────────────────
-let currentUser      = null;
-let editingProductId = null;
-let pendingImageFiles = [];   // File objects waiting to upload
-let uploadedImageURLs = [];   // Already-uploaded URLs (for edits or completed uploads)
-let adminFilter = 'all';
+let currentUser       = null;
+let editingProductId  = null;
+let pendingImageFiles = [];   // File objects chosen but not yet uploaded
+let uploadedImageURLs = [];   // Raw GitHub URLs already uploaded
+let adminFilter       = 'all';
+
+// ─── GitHub token — stored only in the admin's browser localStorage ────
+function getToken() { return localStorage.getItem('gh_token') || ''; }
+function saveToken(t) { localStorage.setItem('gh_token', t.trim()); }
 
 // ─── Auth gate ─────────────────────────────────────────────────────────
 firebase.auth().onAuthStateChanged((user) => {
@@ -19,6 +29,9 @@ firebase.auth().onAuthStateChanged((user) => {
     document.getElementById('loginWall').style.display  = 'none';
     document.getElementById('adminUI').style.display    = 'block';
     document.getElementById('adminUserEmail').textContent = user.email;
+    // Pre-fill saved token
+    const tok = getToken();
+    if (tok) document.getElementById('ghTokenInput').value = '••••••••••••••••' + tok.slice(-4);
     loadAdminProducts();
   } else {
     document.getElementById('loginWall').style.display  = 'flex';
@@ -38,15 +51,32 @@ async function adminLogin() {
   try {
     await firebase.auth().signInWithEmailAndPassword(email, password);
   } catch (err) {
-    errEl.textContent    = err.message;
+    errEl.textContent    = friendlyAuthError(err.code);
     errEl.style.display  = 'block';
     btnText.style.display   = 'inline-block';
     spinner.style.display   = 'none';
   }
 }
 
-function adminLogout() {
-  firebase.auth().signOut();
+function friendlyAuthError(code) {
+  const map = {
+    'auth/wrong-password': 'Incorrect password.',
+    'auth/user-not-found': 'No account with that email.',
+    'auth/invalid-credential': 'Email or password is incorrect.',
+    'auth/too-many-requests': 'Too many attempts. Wait a few minutes.',
+  };
+  return map[code] || 'Sign-in failed. Check your email and password.';
+}
+
+function adminLogout() { firebase.auth().signOut(); }
+
+function saveGhToken() {
+  const raw = document.getElementById('ghTokenInput').value.trim();
+  // If user typed the masked version (starts with bullets), keep existing
+  if (!raw || raw.startsWith('•')) return;
+  saveToken(raw);
+  document.getElementById('ghTokenInput').value = '••••••••••••••••' + raw.slice(-4);
+  showToast('GitHub token saved to your browser.');
 }
 
 // ─── Image drag-and-drop ───────────────────────────────────────────────
@@ -54,11 +84,9 @@ function onDragOver(e) {
   e.preventDefault();
   document.getElementById('dropZone').classList.add('drag-over');
 }
-
-function onDragLeave(e) {
+function onDragLeave() {
   document.getElementById('dropZone').classList.remove('drag-over');
 }
-
 function onDrop(e) {
   e.preventDefault();
   document.getElementById('dropZone').classList.remove('drag-over');
@@ -66,14 +94,11 @@ function onDrop(e) {
 }
 
 function handleFileSelect(files) {
-  const total = pendingImageFiles.length + uploadedImageURLs.length;
+  const already = pendingImageFiles.length + uploadedImageURLs.length;
   for (const file of files) {
-    if (!file.type.startsWith('image/')) continue;
-    if (file.size > 5 * 1024 * 1024) {
-      alert(`${file.name} is too large (max 5 MB).`);
-      continue;
-    }
-    if (total + pendingImageFiles.length >= 10) break;
+    if (!file.type.startsWith('image/')) { alert(`${file.name} is not an image.`); continue; }
+    if (file.size > 5 * 1024 * 1024)    { alert(`${file.name} is too large (max 5 MB).`); continue; }
+    if (already + pendingImageFiles.length >= 10) break;
     pendingImageFiles.push(file);
   }
   renderImagePreviews();
@@ -81,85 +106,110 @@ function handleFileSelect(files) {
 
 function renderImagePreviews() {
   const grid = document.getElementById('imagePreviewGrid');
-  const urls = [
+  const items = [
     ...uploadedImageURLs.map((url, i) => ({ type: 'uploaded', url, index: i })),
-    ...pendingImageFiles.map((file, i) => ({ type: 'pending', file, index: i })),
+    ...pendingImageFiles.map((file, i) => ({ type: 'pending',  file, index: i })),
   ];
+  if (items.length === 0) { grid.innerHTML = ''; return; }
 
-  if (urls.length === 0) {
-    grid.innerHTML = '';
-    return;
-  }
-
-  grid.innerHTML = urls.map(item => {
+  grid.innerHTML = items.map(item => {
     if (item.type === 'uploaded') {
       return `<div class="admin-img-preview">
-        <img src="${escapeHtml(item.url)}" alt="Product image" />
-        <button class="admin-img-remove" onclick="removeUploadedImage(${item.index})" title="Remove">✕</button>
+        <img src="${escapeHtml(item.url)}" alt="uploaded" />
+        <button class="admin-img-remove" onclick="removeUploadedImage(${item.index})">✕</button>
         <span class="admin-img-badge uploaded">✓</span>
       </div>`;
-    } else {
-      const objUrl = URL.createObjectURL(item.file);
-      return `<div class="admin-img-preview" id="pending-${item.index}">
-        <img src="${objUrl}" alt="${escapeHtml(item.file.name)}" />
-        <button class="admin-img-remove" onclick="removePendingImage(${item.index})" title="Remove">✕</button>
-        <span class="admin-img-badge pending">⏳</span>
-      </div>`;
     }
+    const objUrl = URL.createObjectURL(item.file);
+    return `<div class="admin-img-preview">
+      <img src="${objUrl}" alt="${escapeHtml(item.file.name)}" />
+      <button class="admin-img-remove" onclick="removePendingImage(${item.index})">✕</button>
+      <span class="admin-img-badge pending">⏳</span>
+    </div>`;
   }).join('');
 }
 
-function removeUploadedImage(index) {
-  uploadedImageURLs.splice(index, 1);
-  renderImagePreviews();
+function removeUploadedImage(index) { uploadedImageURLs.splice(index, 1); renderImagePreviews(); }
+function removePendingImage(index)  { pendingImageFiles.splice(index, 1); renderImagePreviews(); }
+
+// ─── Upload one file to GitHub via REST API ────────────────────────────
+async function uploadFileToGitHub(file, token, onProgress) {
+  // Convert file to base64
+  const base64 = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload  = () => resolve(reader.result.split(',')[1]); // strip data:...;base64,
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
+  // Build a unique filename: gallery/timestamp_random.ext
+  const ext      = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const filename = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+  const path     = `${GITHUB_FOLDER}/${filename}`;
+  const apiURL   = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}`;
+
+  if (onProgress) onProgress('uploading');
+
+  const res = await fetch(apiURL, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type':  'application/json',
+      'Accept':        'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+    },
+    body: JSON.stringify({
+      message: `Add product image: ${filename}`,
+      content: base64,
+      branch:  GITHUB_BRANCH,
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    // Useful error messages for common failures
+    if (res.status === 401) throw new Error('GitHub token is invalid or expired. Please update it in the Token section above.');
+    if (res.status === 403) throw new Error('GitHub token does not have repo write permission. Create a new token with the "Contents: Read and write" permission.');
+    if (res.status === 404) throw new Error(`Repository nichervanessa/lmp-verify not found or token has no access.`);
+    throw new Error(`GitHub upload failed (${res.status}): ${err.message || res.statusText}`);
+  }
+
+  // Return the raw.githubusercontent.com URL (served as a plain CDN)
+  return `${RAW_BASE}/${filename}`;
 }
 
-function removePendingImage(index) {
-  pendingImageFiles.splice(index, 1);
-  renderImagePreviews();
-}
-
-// ─── Upload all pending images to Firebase Storage ─────────────────────
-async function uploadPendingImages(productId) {
+// ─── Upload all pending images to GitHub ──────────────────────────────
+async function uploadPendingImages() {
   if (pendingImageFiles.length === 0) return;
 
-  const progressBar   = document.getElementById('uploadProgress');
-  const fill          = document.getElementById('progressFill');
-  const label         = document.getElementById('progressLabel');
+  const token = getToken();
+  if (!token) {
+    throw new Error(
+      'No GitHub token found. Paste your Personal Access Token in the Token section and click Save.'
+    );
+  }
+
+  const progressBar = document.getElementById('uploadProgress');
+  const fill        = document.getElementById('progressFill');
+  const label       = document.getElementById('progressLabel');
   progressBar.style.display = 'block';
 
   for (let i = 0; i < pendingImageFiles.length; i++) {
-    const file     = pendingImageFiles[i];
-    const ext      = file.name.split('.').pop() || 'jpg';
-    const filename = `img_${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
-    const ref      = storage.ref(`products/${productId}/${filename}`);
+    const file = pendingImageFiles[i];
+    label.textContent = `Uploading image ${i + 1} of ${pendingImageFiles.length}: ${file.name}`;
+    fill.style.width  = `${Math.round((i / pendingImageFiles.length) * 100)}%`;
 
-    label.textContent = `Uploading ${i + 1} of ${pendingImageFiles.length}…`;
-
-    await new Promise((resolve, reject) => {
-      const task = ref.put(file);
-      task.on('state_changed',
-        (snap) => {
-          const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
-          fill.style.width = `${Math.round(((i / pendingImageFiles.length) * 100) + pct / pendingImageFiles.length)}%`;
-        },
-        reject,
-        async () => {
-          const url = await task.snapshot.ref.getDownloadURL();
-          uploadedImageURLs.push(url);
-          resolve();
-        }
-      );
-    });
+    const url = await uploadFileToGitHub(file, token, () => {});
+    uploadedImageURLs.push(url);
   }
 
   pendingImageFiles = [];
   fill.style.width  = '100%';
-  label.textContent = 'Upload complete!';
-  setTimeout(() => { progressBar.style.display = 'none'; fill.style.width = '0%'; }, 1200);
+  label.textContent = 'All images uploaded to GitHub ✓';
+  setTimeout(() => { progressBar.style.display = 'none'; fill.style.width = '0%'; }, 2000);
 }
 
-// ─── Save product (create or update) ──────────────────────────────────
+// ─── Save product ──────────────────────────────────────────────────────
 async function saveProduct() {
   const errEl   = document.getElementById('formError');
   const saveBtn = document.getElementById('saveBtn');
@@ -176,11 +226,12 @@ async function saveProduct() {
 
   if (!name)     { showFormError('Product name is required.'); return; }
   if (!category) { showFormError('Please select a category.'); return; }
-  if (!price || isNaN(price) || price < 0) {
-    showFormError('Please enter a valid price.'); return;
-  }
+  if (!price || isNaN(price) || price < 0) { showFormError('Please enter a valid price.'); return; }
   if (uploadedImageURLs.length + pendingImageFiles.length === 0) {
     showFormError('Please add at least one image.'); return;
+  }
+  if (pendingImageFiles.length > 0 && !getToken()) {
+    showFormError('Please add your GitHub token first (see the Token section above).'); return;
   }
 
   btnText.style.display = 'none';
@@ -188,20 +239,17 @@ async function saveProduct() {
   saveBtn.disabled = true;
 
   try {
-    // Generate a stable product ID upfront (or reuse the existing one when editing).
-    // This lets us use the ID as the Storage path BEFORE the Firestore doc exists,
-    // avoiding the two-step add-then-set pattern that caused permission errors.
-    const productId = editingProductId
-      || db.collection('products').doc().id;   // client-side auto-ID
+    // 1. Upload any new images to GitHub
+    await uploadPendingImages();
 
-    // Upload images first (needs productId for the Storage path)
-    await uploadPendingImages(productId);
+    // 2. Generate or reuse product ID
+    const productId = editingProductId || db.collection('products').doc().id;
+    const isNew     = !editingProductId;
 
-    // Single atomic write — create or overwrite
-    const isNew = !editingProductId;
-    const data  = {
+    // 3. Save product metadata to Firestore (image URLs are GitHub raw URLs)
+    const data = {
       name, category, price, shortDesc, fullDesc, published,
-      images:    uploadedImageURLs,
+      images:    uploadedImageURLs,   // array of raw.githubusercontent.com URLs
       updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
     };
     if (isNew) {
@@ -209,23 +257,17 @@ async function saveProduct() {
       data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
     }
 
-    // set() with merge:false for new docs, merge:true for edits so we
-    // don't accidentally wipe fields we're not editing.
     await db.collection('products').doc(productId).set(data, { merge: !isNew });
 
     resetForm();
     loadAdminProducts();
-    showToast(editingProductId ? 'Product updated.' : 'Product saved!');
+    showToast(isNew ? '✅ Product saved!' : '✅ Product updated!');
   } catch (err) {
     console.error('Save error:', err);
-    // Give a helpful hint if it's still a permissions error
     if (err.code === 'permission-denied') {
-      showFormError(
-        'Permission denied. Make sure you have published the Firestore rules ' +
-        'from the firestore.rules file in Firebase Console → Firestore → Rules.'
-      );
+      showFormError('Firestore permission denied. Publish the firestore.rules file in Firebase Console → Firestore → Rules.');
     } else {
-      showFormError('Save failed: ' + err.message);
+      showFormError(err.message);
     }
   } finally {
     btnText.style.display = 'inline-block';
@@ -234,44 +276,37 @@ async function saveProduct() {
   }
 }
 
-function showFormError(msg) {
-  const el = document.getElementById('formError');
-  el.textContent  = msg;
-  el.style.display = 'block';
-  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
-
 // ─── Reset form ────────────────────────────────────────────────────────
 function resetForm() {
   editingProductId  = null;
   pendingImageFiles = [];
   uploadedImageURLs = [];
-  document.getElementById('pName').value      = '';
-  document.getElementById('pPrice').value     = '';
-  document.getElementById('pShortDesc').value = '';
-  document.getElementById('pFullDesc').value  = '';
+  document.getElementById('pName').value        = '';
+  document.getElementById('pPrice').value       = '';
+  document.getElementById('pShortDesc').value   = '';
+  document.getElementById('pFullDesc').value    = '';
   document.getElementById('pPublished').checked = true;
   document.querySelector('input[name="pCategory"][value="internet"]').checked = true;
   document.getElementById('imagePreviewGrid').innerHTML = '';
-  document.getElementById('formError').style.display = 'none';
-  document.getElementById('formTitle').textContent = 'Add New Product';
-  document.getElementById('saveBtnText').textContent = 'Save Product';
+  document.getElementById('formError').style.display   = 'none';
+  document.getElementById('formTitle').textContent      = 'Add New Product';
+  document.getElementById('saveBtnText').textContent    = 'Save Product';
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ─── Load admin product list ───────────────────────────────────────────
+// ─── Load product list ─────────────────────────────────────────────────
 async function loadAdminProducts() {
   const loading = document.getElementById('loadingAdminList');
   loading.style.display = 'flex';
   try {
-    const snap = await db.collection('products')
-      .orderBy('createdAt', 'desc')
-      .get();
+    const snap = await db.collection('products').orderBy('createdAt', 'desc').get();
     const products = [];
     snap.forEach(doc => products.push({ id: doc.id, ...doc.data() }));
     renderAdminList(products);
   } catch (err) {
-    console.error(err);
+    console.error('Load error:', err);
+    document.getElementById('adminProductList').innerHTML =
+      `<p style="color:#ef4444; padding:1rem;">Could not load products: ${escapeHtml(err.message)}</p>`;
   } finally {
     loading.style.display = 'none';
   }
@@ -293,7 +328,7 @@ function filterAdminList(cat) {
   const list = document.getElementById('adminProductList');
 
   if (filtered.length === 0) {
-    list.innerHTML = `<div class="empty-loans" style="padding:2rem; border:none;"><p>No products yet.</p></div>`;
+    list.innerHTML = `<div class="empty-loans" style="padding:2rem;border:none;"><p>No products yet.</p></div>`;
     return;
   }
 
@@ -310,7 +345,7 @@ function filterAdminList(cat) {
           <span class="admin-cat-badge">${p.category || '—'}</span>
           <span>${fmtCurrency(p.price)}</span>
           <span class="admin-status-badge ${p.published ? 'pub' : 'draft'}">${p.published ? '● Live' : '○ Draft'}</span>
-          <span>${(p.images || []).length} img</span>
+          <span>${(p.images || []).length} image(s)</span>
         </div>
       </div>
       <div class="admin-product-actions">
@@ -324,18 +359,18 @@ function filterAdminList(cat) {
 // ─── Edit ──────────────────────────────────────────────────────────────
 async function editProduct(productId) {
   try {
-    const doc = await db.collection('products').doc(productId).get();
-    if (!doc.exists) return;
-    const p = doc.data();
+    const snap = await db.collection('products').doc(productId).get();
+    if (!snap.exists) return;
+    const p = snap.data();
 
-    editingProductId = productId;
+    editingProductId  = productId;
     uploadedImageURLs = [...(p.images || [])];
     pendingImageFiles = [];
 
-    document.getElementById('pName').value      = p.name || '';
-    document.getElementById('pPrice').value     = p.price || '';
-    document.getElementById('pShortDesc').value = p.shortDesc || '';
-    document.getElementById('pFullDesc').value  = p.fullDesc || '';
+    document.getElementById('pName').value        = p.name      || '';
+    document.getElementById('pPrice').value       = p.price     || '';
+    document.getElementById('pShortDesc').value   = p.shortDesc || '';
+    document.getElementById('pFullDesc').value    = p.fullDesc  || '';
     document.getElementById('pPublished').checked = p.published !== false;
 
     const catInput = document.querySelector(`input[name="pCategory"][value="${p.category}"]`);
@@ -352,21 +387,19 @@ async function editProduct(productId) {
 }
 
 // ─── Delete ────────────────────────────────────────────────────────────
+// Note: images in GitHub are NOT deleted — they stay in the gallery/ folder.
+// This is intentional: deleting via API also requires a token + the file SHA,
+// and orphaned images on GitHub cost nothing (free storage).
+// If you want to clean up, delete them manually in the GitHub web UI.
 async function deleteProduct(productId, name) {
-  if (!confirm(`Delete "${name}"? This cannot be undone. Images in Storage will also be removed.`)) return;
+  if (!confirm(
+    `Delete "${name}"?\n\nThe product will be removed from Firestore.\nImages will remain in the GitHub gallery/ folder (they cost nothing to keep).`
+  )) return;
   try {
-    // Delete Firestore doc
     await db.collection('products').doc(productId).delete();
-    // Attempt to delete Storage files (best-effort)
-    try {
-      const listRef = storage.ref(`products/${productId}`);
-      const list    = await listRef.listAll();
-      await Promise.all(list.items.map(ref => ref.delete()));
-    } catch (storageErr) {
-      console.warn('Could not delete storage files:', storageErr.message);
-    }
+    if (editingProductId === productId) resetForm();
     loadAdminProducts();
-    showToast('Product deleted.');
+    showToast('Product deleted from Firestore.');
   } catch (err) {
     alert('Delete failed: ' + err.message);
   }
@@ -374,15 +407,20 @@ async function deleteProduct(productId, name) {
 
 // ─── Helpers ───────────────────────────────────────────────────────────
 function fmtCurrency(amount) {
-  const num = Number(amount) || 0;
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(num);
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Number(amount) || 0);
 }
 
 function escapeHtml(str) {
-  if (!str) return '';
-  return String(str)
+  return String(str || '')
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function showFormError(msg) {
+  const el = document.getElementById('formError');
+  el.textContent   = msg;
+  el.style.display = 'block';
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function showToast(msg) {
@@ -396,5 +434,5 @@ function showToast(msg) {
   toast.textContent = msg;
   toast.classList.add('show');
   clearTimeout(toast._t);
-  toast._t = setTimeout(() => toast.classList.remove('show'), 3000);
+  toast._t = setTimeout(() => toast.classList.remove('show'), 3500);
 }
