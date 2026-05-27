@@ -50,7 +50,7 @@ function fmtDate(d) {
 async function lookup(e) {
   e.preventDefault();
   hideAll();
-  const btn = document.getElementById('lookupBtn');
+  const btn  = document.getElementById('lookupBtn');
   const text = document.getElementById('lookupBtnText');
   const spin = document.getElementById('lookupSpinner');
 
@@ -79,11 +79,12 @@ async function lookup(e) {
     document.getElementById('loadingCard').style.display = 'none';
 
     if (snap.empty) {
+      // Could be legitimately empty OR the collection doesn't exist yet
+      // (desktop app hasn't synced any loans). Show the not-found card either way.
       document.getElementById('notFoundCard').style.display = 'block';
       return;
     }
 
-    // Group loans by customer (in case there are multiple records)
     const loans = [];
     let customerInfo = null;
     snap.forEach(doc => {
@@ -91,20 +92,40 @@ async function lookup(e) {
       loans.push({ id: doc.id, ...data });
       if (!customerInfo) {
         customerInfo = {
-          name:  data.customerName  || 'Customer',
-          email: data.customerEmail || '',
-          phone: data.customerPhone || '',
+          name:             data.customerName  || 'Customer',
+          email:            data.customerEmail || '',
+          phone:            data.customerPhone || '',
           remindersEnabled: !!data.remindersEnabled,
         };
       }
     });
 
     currentCustomer = customerInfo;
-    currentLoans = loans;
+    currentLoans    = loans;
     renderResults();
+
   } catch (err) {
-    console.error('Lookup failed:', err);
-    alert(t('myLoans.lookupError') || 'Lookup failed. Please try again.');
+    document.getElementById('loadingCard').style.display = 'none';
+    console.error('Lookup error:', err);
+
+    // Show a specific, helpful message rather than the raw Firebase error
+    let msg = '';
+    if (err.code === 'permission-denied') {
+      msg = 'Access denied. The Firestore security rules have not been published yet. ' +
+            'Please paste the firestore.rules file into Firebase Console → Firestore → Rules → Publish.';
+    } else if (err.message && err.message.includes('index')) {
+      msg = 'Database index not ready. Open the Firebase Console → Firestore → Indexes and wait for the index to finish building (usually 1–2 minutes), then try again.';
+    } else {
+      msg = 'Lookup failed: ' + (err.message || 'Unknown error.');
+    }
+
+    // Show as not-found card with the error text
+    const nf = document.getElementById('notFoundCard');
+    nf.style.display = 'block';
+    // Temporarily override the description text with the real error
+    const descEl = nf.querySelector('p');
+    if (descEl) descEl.textContent = msg;
+
   } finally {
     text.style.display = 'inline-block';
     spin.style.display = 'none';
