@@ -174,9 +174,11 @@ async function saveProduct() {
   const fullDesc  = document.getElementById('pFullDesc').value.trim();
   const published = document.getElementById('pPublished').checked;
 
-  if (!name) { showFormError('Product name is required.'); return; }
+  if (!name)     { showFormError('Product name is required.'); return; }
   if (!category) { showFormError('Please select a category.'); return; }
-  if (!price || isNaN(price) || price < 0) { showFormError('Please enter a valid price.'); return; }
+  if (!price || isNaN(price) || price < 0) {
+    showFormError('Please enter a valid price.'); return;
+  }
   if (uploadedImageURLs.length + pendingImageFiles.length === 0) {
     showFormError('Please add at least one image.'); return;
   }
@@ -186,39 +188,45 @@ async function saveProduct() {
   saveBtn.disabled = true;
 
   try {
-    // Use existing ID if editing, or create a new doc first to get the ID
-    let productId = editingProductId;
-    if (!productId) {
-      const ref = await db.collection('products').add({
-        name, category, price, shortDesc, fullDesc, published,
-        images: [],
-        createdBy: currentUser.uid,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      });
-      productId = ref.id;
-    }
+    // Generate a stable product ID upfront (or reuse the existing one when editing).
+    // This lets us use the ID as the Storage path BEFORE the Firestore doc exists,
+    // avoiding the two-step add-then-set pattern that caused permission errors.
+    const productId = editingProductId
+      || db.collection('products').doc().id;   // client-side auto-ID
 
-    // Upload any pending images using the product ID as the storage path
+    // Upload images first (needs productId for the Storage path)
     await uploadPendingImages(productId);
 
-    // Write final document with all image URLs
-    const data = {
+    // Single atomic write — create or overwrite
+    const isNew = !editingProductId;
+    const data  = {
       name, category, price, shortDesc, fullDesc, published,
-      images: uploadedImageURLs,
+      images:    uploadedImageURLs,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
     };
-    if (!editingProductId) {
+    if (isNew) {
       data.createdBy = currentUser.uid;
       data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
     }
-    await db.collection('products').doc(productId).set(data, { merge: true });
+
+    // set() with merge:false for new docs, merge:true for edits so we
+    // don't accidentally wipe fields we're not editing.
+    await db.collection('products').doc(productId).set(data, { merge: !isNew });
 
     resetForm();
     loadAdminProducts();
     showToast(editingProductId ? 'Product updated.' : 'Product saved!');
   } catch (err) {
-    console.error(err);
-    showFormError('Save failed: ' + err.message);
+    console.error('Save error:', err);
+    // Give a helpful hint if it's still a permissions error
+    if (err.code === 'permission-denied') {
+      showFormError(
+        'Permission denied. Make sure you have published the Firestore rules ' +
+        'from the firestore.rules file in Firebase Console → Firestore → Rules.'
+      );
+    } else {
+      showFormError('Save failed: ' + err.message);
+    }
   } finally {
     btnText.style.display = 'inline-block';
     spinner.style.display = 'none';
