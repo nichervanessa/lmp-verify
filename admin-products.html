@@ -9,11 +9,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-  <!-- Firebase -->
+  <!-- Firebase (Auth + Firestore only — images go to GitHub, not Storage) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -78,6 +77,30 @@
     </nav>
 
     <div class="container admin-container">
+
+      <!-- ── GITHUB TOKEN SETUP ── -->
+      <div class="lookup-card" style="margin-bottom:1.5rem; border-color:#fde68a; background:#fffbeb;">
+        <h2 class="section-title" style="font-size:1rem; margin-bottom:.5rem;">
+          🔑 GitHub Token (required for image uploads)
+        </h2>
+        <p style="font-size:.82rem; color:#78350f; margin:0 0 .875rem; line-height:1.55;">
+          Images are saved to <strong>nichervanessa/lmp-verify → gallery/</strong> folder via the GitHub API.
+          Your token is stored only in <em>this browser</em> — never sent to Firebase or any server.
+          <a href="https://github.com/settings/tokens/new?scopes=repo&description=lmp-product-images" target="_blank" rel="noopener" style="color:#4338ca; font-weight:700;">Create a token here →</a>
+          (enable <strong>Contents: Read and write</strong> under Repository permissions, or check the legacy <strong>repo</strong> scope).
+        </p>
+        <div style="display:flex; gap:.625rem; flex-wrap:wrap; align-items:flex-end;">
+          <div class="form-group" style="flex:1; min-width:200px; margin:0;">
+            <label style="font-size:.8rem; font-weight:600; color:#78350f;">Personal Access Token</label>
+            <input type="password" id="ghTokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+              autocomplete="off" style="border-color:#fcd34d; background:#fff;" />
+          </div>
+          <button class="primary-btn" style="width:auto; background:linear-gradient(135deg,#f59e0b,#d97706); box-shadow:0 4px 12px -3px rgba(245,158,11,.45);"
+            onclick="saveGhToken()">
+            Save Token
+          </button>
+        </div>
+      </div>
 
       <!-- ── ADD / EDIT FORM ── -->
       <div class="lookup-card admin-form-card">
