@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-  <!-- Firebase (Auth + Firestore only — images go to GitHub, not Storage) -->
+  <!-- Firebase (Auth + Firestore only — images hosted on Cloudinary) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -22,30 +22,37 @@
   <div class="auth-gate" id="authGate">
     <div class="auth-gate-inner">
       <div class="big-spinner"></div>
-      <p>Checking authentication…</p>
+      <p data-i18n="admin.checkingAuth">Checking authentication…</p>
     </div>
   </div>
 
   <!-- ── LOGIN WALL — shown if not logged in ── -->
   <div class="auth-gate" id="loginWall" style="display:none">
     <div class="lookup-card" style="max-width:420px; margin:0 auto;">
-      <h2 class="modal-title">Admin Login</h2>
-      <p class="modal-sub">You must be signed in to manage products.</p>
+      <div style="display:flex; justify-content:flex-end; margin-bottom:1rem;">
+        <div class="lang-switcher">
+          <button onclick="setLang('en')" class="lang-btn active" id="btn-en">EN</button>
+          <button onclick="setLang('ar')" class="lang-btn" id="btn-ar">عر</button>
+          <button onclick="setLang('ku')" class="lang-btn" id="btn-ku">کو</button>
+        </div>
+      </div>
+      <h2 class="modal-title" data-i18n="admin.loginTitle">Admin Login</h2>
+      <p class="modal-sub" data-i18n="admin.loginSub">You must be signed in to manage products.</p>
       <div id="adminLoginError" class="login-error" style="display:none"></div>
       <div class="form-group">
-        <label>Email</label>
+        <label data-i18n="admin.emailLabel">Email</label>
         <input type="email" id="adminEmail" placeholder="staff@company.com" autocomplete="email" />
       </div>
       <div class="form-group">
-        <label>Password</label>
+        <label data-i18n="admin.passwordLabel">Password</label>
         <input type="password" id="adminPassword" placeholder="••••••••" autocomplete="current-password" />
       </div>
       <button class="primary-btn" onclick="adminLogin()">
-        <span id="loginBtnText">Sign In</span>
+        <span id="loginBtnText" data-i18n="admin.signIn">Sign In</span>
         <div class="btn-spinner" id="loginSpinner" style="display:none"></div>
       </button>
       <p style="margin-top:1rem; text-align:center">
-        <a href="products.html" style="color:#6366f1; text-decoration:none; font-size:0.875rem;">← Back to Products</a>
+        <a href="products.html" style="color:#6366f1; text-decoration:none; font-size:0.875rem;" data-i18n="admin.backToProducts">← Back to Products</a>
       </p>
     </div>
   </div>
@@ -65,101 +72,98 @@
           </div>
           <div>
             <div class="nav-logo-name">Admin Panel</div>
-            <div class="nav-logo-sub">Manage Products</div>
+            <div class="nav-logo-sub" data-i18n="admin.existingProducts">Manage Products</div>
           </div>
         </a>
         <div class="nav-links">
-          <a href="products.html" class="nav-link">← View Products</a>
+          <a href="products.html" class="nav-link" data-i18n="admin.viewProducts">← View Products</a>
           <span id="adminUserEmail" style="font-size:0.8rem; color:#94a3b8; padding:0 0.5rem;"></span>
-          <button class="ghost-btn" onclick="adminLogout()">Sign Out</button>
+          <div class="lang-switcher">
+            <button onclick="setLang('en')" class="lang-btn active" id="btn-en">EN</button>
+            <button onclick="setLang('ar')" class="lang-btn" id="btn-ar">عر</button>
+            <button onclick="setLang('ku')" class="lang-btn" id="btn-ku">کو</button>
+          </div>
+          <button class="ghost-btn" onclick="adminLogout()" data-i18n="admin.signOut">Sign Out</button>
         </div>
       </div>
     </nav>
 
     <div class="container admin-container">
 
-      <!-- ── GITHUB TOKEN SETUP ── -->
-      <div class="lookup-card" style="margin-bottom:1.5rem; border-color:#fde68a; background:#fffbeb;">
-        <h2 class="section-title" style="font-size:1rem; margin-bottom:.5rem;">
-          🔑 GitHub Token (required for image uploads)
-        </h2>
-        <p style="font-size:.82rem; color:#78350f; margin:0 0 .875rem; line-height:1.55;">
-          Images are saved to <strong>nichervanessa/lmp-verify → gallery/</strong> folder via the GitHub API.
-          Your token is stored only in <em>this browser</em> — never sent to Firebase or any server.
-          <a href="https://github.com/settings/tokens/new?scopes=repo&description=lmp-product-images" target="_blank" rel="noopener" style="color:#4338ca; font-weight:700;">Create a token here →</a>
-          (enable <strong>Contents: Read and write</strong> under Repository permissions, or check the legacy <strong>repo</strong> scope).
-        </p>
-        <div style="display:flex; gap:.625rem; flex-wrap:wrap; align-items:flex-end;">
-          <div class="form-group" style="flex:1; min-width:200px; margin:0;">
-            <label style="font-size:.8rem; font-weight:600; color:#78350f;">Personal Access Token</label>
-            <input type="password" id="ghTokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
-              autocomplete="off" style="border-color:#fcd34d; background:#fff;" />
+      <!-- ── IMGBB CONFIG ── -->
+      <div class="lookup-card" id="imgbbConfigCard" style="margin-bottom:1.5rem; border-color:#dbeafe; background:#eff6ff;">
+        <h2 class="section-title" style="font-size:1rem; margin-bottom:0.25rem;" data-i18n="admin.imgbbTitle">🖼️ Image Hosting Config (ImgBB)</h2>
+        <p style="font-size:0.825rem; color:#475569; margin-bottom:0.75rem;" data-i18n="admin.imgbbDesc">Free image hosting. Setup: create free account at imgbb.com → go to api.imgbb.com → click "Get API key" → copy and paste it below.</p>
+        <div style="display:flex; gap:0.625rem; flex-wrap:wrap; align-items:flex-end;">
+          <div class="form-group" style="margin:0; flex:1; min-width:220px;">
+            <label style="font-size:0.8rem;" data-i18n="admin.imgbbKeyLabel">ImgBB API Key</label>
+            <input type="text" id="imgbbApiKey" placeholder="e.g. a1b2c3d4e5f6..." autocomplete="off" />
           </div>
-          <button class="primary-btn" style="width:auto; background:linear-gradient(135deg,#f59e0b,#d97706); box-shadow:0 4px 12px -3px rgba(245,158,11,.45);"
-            onclick="saveGhToken()">
-            Save Token
+          <button class="primary-btn" onclick="saveImgBBConfig()" style="white-space:nowrap; height:42px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            <span data-i18n="admin.saveConfig">Save Config</span>
           </button>
         </div>
       </div>
 
       <!-- ── ADD / EDIT FORM ── -->
       <div class="lookup-card admin-form-card">
-        <h2 class="section-title" id="formTitle">Add New Product</h2>
+        <h2 class="section-title" id="formTitle" data-i18n="admin.formTitleAdd">Add New Product</h2>
 
         <div class="admin-form-grid">
           <!-- Left: details -->
           <div>
             <div class="form-group">
-              <label>Product Name <span style="color:#ef4444">*</span></label>
-              <input type="text" id="pName" placeholder="e.g. TP-Link Wireless Router AC1200" />
+              <label data-i18n="admin.nameLabel">Product Name <span style="color:#ef4444">*</span></label>
+              <input type="text" id="pName" data-i18n-placeholder="admin.namePlaceholder" placeholder="e.g. TP-Link Wireless Router AC1200" />
             </div>
 
             <div class="form-group">
-              <label>Category <span style="color:#ef4444">*</span></label>
+              <label data-i18n="admin.categoryLabel">Category <span style="color:#ef4444">*</span></label>
               <div class="admin-cat-grid">
                 <label class="admin-cat-option">
                   <input type="radio" name="pCategory" value="internet" checked />
                   <span>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
-                    Internet
+                    <span data-i18n="products.catInternet">Internet</span>
                   </span>
                 </label>
                 <label class="admin-cat-option">
                   <input type="radio" name="pCategory" value="solar" />
                   <span>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/></svg>
-                    Solar
+                    <span data-i18n="products.catSolar">Solar</span>
                   </span>
                 </label>
                 <label class="admin-cat-option">
                   <input type="radio" name="pCategory" value="camera" />
                   <span>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                    Camera
+                    <span data-i18n="products.catCamera">Camera</span>
                   </span>
                 </label>
               </div>
             </div>
 
             <div class="form-group">
-              <label>Price (number only) <span style="color:#ef4444">*</span></label>
-              <input type="number" id="pPrice" placeholder="e.g. 75000" min="0" step="any" inputmode="decimal" />
+              <label data-i18n="admin.priceLabel">Price (number only) <span style="color:#ef4444">*</span></label>
+              <input type="number" id="pPrice" data-i18n-placeholder="admin.pricePlaceholder" placeholder="e.g. 75000" min="0" step="any" inputmode="decimal" />
             </div>
 
             <div class="form-group">
-              <label>Short Description</label>
-              <input type="text" id="pShortDesc" placeholder="One-line summary shown on the card" maxlength="100" />
+              <label data-i18n="admin.shortDescLabel">Short Description</label>
+              <input type="text" id="pShortDesc" data-i18n-placeholder="admin.shortDescPlaceholder" placeholder="One-line summary shown on the card" maxlength="100" />
             </div>
 
             <div class="form-group">
-              <label>Full Description</label>
-              <textarea id="pFullDesc" rows="5" placeholder="Full product details, specs, warranty info…"></textarea>
+              <label data-i18n="admin.fullDescLabel">Full Description</label>
+              <textarea id="pFullDesc" rows="5" data-i18n-placeholder="admin.fullDescPlaceholder" placeholder="Full product details, specs, warranty info…"></textarea>
             </div>
 
             <div class="form-group">
               <label class="admin-toggle-label">
                 <input type="checkbox" id="pPublished" checked />
-                Publish immediately (visible to public)
+                <span data-i18n="admin.publishLabel">Publish immediately (visible to public)</span>
               </label>
             </div>
           </div>
@@ -167,15 +171,15 @@
           <!-- Right: image upload -->
           <div>
             <div class="form-group">
-              <label>Product Images (max 10)</label>
+              <label data-i18n="admin.imagesLabel">Product Images (max 10)</label>
               <div class="image-drop-zone" id="dropZone"
                 onclick="document.getElementById('imageFileInput').click()"
                 ondragover="onDragOver(event)"
                 ondragleave="onDragLeave(event)"
                 ondrop="onDrop(event)">
                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                <p>Click or drag images here</p>
-                <small>JPG, PNG, WebP · Max 5 MB each</small>
+                <p data-i18n="admin.dropText">Click or drag images here</p>
+                <small data-i18n="admin.dropSub">JPG, PNG, WebP · Max 5 MB each</small>
               </div>
               <input type="file" id="imageFileInput" accept="image/*" multiple style="display:none" onchange="handleFileSelect(this.files)" />
             </div>
@@ -196,10 +200,10 @@
 
         <!-- Action buttons -->
         <div class="admin-form-actions">
-          <button class="ghost-btn" onclick="resetForm()">Cancel / Reset</button>
+          <button class="ghost-btn" onclick="resetForm()" data-i18n="admin.cancel">Cancel / Reset</button>
           <button class="primary-btn" id="saveBtn" onclick="saveProduct()">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-            <span id="saveBtnText">Save Product</span>
+            <span id="saveBtnText" data-i18n="admin.saveProduct">Save Product</span>
             <div class="btn-spinner" id="saveSpinner" style="display:none"></div>
           </button>
         </div>
@@ -208,12 +212,12 @@
       <!-- ── EXISTING PRODUCTS TABLE ── -->
       <div class="admin-list-card">
         <div class="admin-list-header">
-          <h2 class="section-title">Existing Products</h2>
+          <h2 class="section-title" data-i18n="admin.existingProducts">Existing Products</h2>
           <div class="admin-list-filter">
-            <button class="cat-tab active" data-cat="all" onclick="filterAdminList('all')">All</button>
-            <button class="cat-tab" data-cat="internet" onclick="filterAdminList('internet')">Internet</button>
-            <button class="cat-tab" data-cat="solar" onclick="filterAdminList('solar')">Solar</button>
-            <button class="cat-tab" data-cat="camera" onclick="filterAdminList('camera')">Camera</button>
+            <button class="cat-tab active" data-cat="all" onclick="filterAdminList('all')" data-i18n="admin.allCat">All</button>
+            <button class="cat-tab" data-cat="internet" onclick="filterAdminList('internet')" data-i18n="products.catInternet">Internet</button>
+            <button class="cat-tab" data-cat="solar" onclick="filterAdminList('solar')" data-i18n="products.catSolar">Solar</button>
+            <button class="cat-tab" data-cat="camera" onclick="filterAdminList('camera')" data-i18n="products.catCamera">Camera</button>
           </div>
         </div>
 
