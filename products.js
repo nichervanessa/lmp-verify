@@ -42,14 +42,20 @@ async function loadProducts() {
   try {
     const snap = await db.collection('products')
       .where('published', '==', true)
-      .orderBy('createdAt', 'desc')
       .get();
 
-    // Group by category
+    // Group by category, sort newest first in JS (avoids needing a Firestore composite index)
     const grouped = { internet: [], solar: [], camera: [] };
     snap.forEach(doc => {
       const p = { id: doc.id, ...doc.data() };
       if (grouped[p.category]) grouped[p.category].push(p);
+    });
+    Object.keys(grouped).forEach(cat => {
+      grouped[cat].sort((a, b) => {
+        const ta = a.createdAt?.toMillis?.() || 0;
+        const tb = b.createdAt?.toMillis?.() || 0;
+        return tb - ta;
+      });
     });
     allProducts = grouped;
     loading.style.display = 'none';
