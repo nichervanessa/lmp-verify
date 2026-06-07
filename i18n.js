@@ -6,7 +6,7 @@ const TRANSLATIONS = {
     hero: {
       badge: '🔒 Secure Document Verification',
       title: 'Verify Invoice <span class="gradient-text">Authenticity</span>',
-      desc: 'Instantly verify any invoice or document issued by Loan Management Pro. Scan the QR code or enter the invoice number to confirm it\'s genuine.',
+      desc: 'Instantly verify any invoice or document issued by SHIRWAN IT. Scan the QR code or enter the invoice number to confirm it\'s genuine.',
       cta: 'Verify Now',
       learn: 'Learn How →'
     },
@@ -43,14 +43,15 @@ const TRANSLATIONS = {
       verifyAnotherBtn: 'Verify Another',
       paymentType: 'Payment Invoice',
       loanType: 'Loan Agreement',
-      customerType: 'Customer Statement'
+      customerType: 'Customer Statement',
+      companyDebtType: 'Company Debt Invoice'
     },
     how: {
       label: 'Simple Process',
       title: 'How Verification Works',
       desc: 'Three steps to confirm any invoice is authentic.',
       step1Title: 'Receive Invoice',
-      step1Desc: 'Get your invoice from Loan Management Pro. Every invoice has a unique QR code and invoice number at the bottom.',
+      step1Desc: 'Get your invoice from SHIRWAN IT. Every invoice has a unique QR code and invoice number at the bottom.',
       step2Title: 'Scan or Enter Code',
       step2Desc: 'Scan the QR code with your phone camera, or manually type the invoice number into the field above.',
       step3Title: 'Instant Result',
@@ -59,7 +60,7 @@ const TRANSLATIONS = {
     about: {
       label: 'About the System',
       title: 'Built for Trust & Transparency',
-      desc1: 'Loan Management Pro is a professional desktop application for managing loans, customers, and payments. Every invoice it generates carries a unique verification code.',
+      desc1: 'SHIRWAN IT is a professional desktop application for managing loans, customers, and payments. Every invoice it generates carries a unique verification code.',
       desc2: 'This public verification portal lets anyone confirm that an invoice is genuine and has not been altered.',
       feat1: 'Real-time Firebase database lookup',
       feat2: 'Supports English, Arabic & Kurdish',
