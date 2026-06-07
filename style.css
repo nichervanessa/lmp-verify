@@ -2,21 +2,36 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
+  /* ── SHIRWAN IT Brand Palette ─────────────────────────────────── */
+  --brand-600:  #4f46e5;   /* indigo-600  — primary CTA, links       */
+  --brand-700:  #4338ca;   /* indigo-700  — hover                    */
+  --brand-800:  #3730a3;   /* indigo-800  — dark accents             */
+  --brand-500:  #6366f1;   /* indigo-500  — lighter accent           */
+  --brand-100:  #e0e7ff;   /* indigo-100  — light surfaces           */
+  --brand-50:   #eef2ff;   /* indigo-50   — subtle bg                */
+  --violet-600: #7c3aed;   /* violet-600  — gradient end             */
+  --violet-500: #8b5cf6;   /* violet-500  — secondary                */
+
+  /* ── Blue aliases (backward compat) ──────────────────────────── */
   --blue-900: #0f172a;
   --blue-800: #1e1b4b;
-  --blue-700: #1e3a8a;
-  --blue-600: #1d4ed8;
-  --blue-500: #3b82f6;
-  --blue-400: #60a5fa;
-  --blue-100: #dbeafe;
-  --blue-50:  #eff6ff;
-  --green-600: #16a34a;
-  --green-500: #22c55e;
-  --green-100: #dcfce7;
+  --blue-700: #3730a3;
+  --blue-600: #4f46e5;
+  --blue-500: #6366f1;
+  --blue-400: #818cf8;
+  --blue-100: #e0e7ff;
+  --blue-50:  #eef2ff;
+
+  /* ── Semantic ─────────────────────────────────────────────────── */
+  --green-600: #059669;
+  --green-500: #10b981;
+  --green-100: #d1fae5;
   --red-500:   #ef4444;
   --red-100:   #fee2e2;
-  --yellow-500: #eab308;
-  --yellow-100: #fef9c3;
+  --yellow-500: #d97706;
+  --yellow-100: #fef3c7;
+
+  /* ── Neutrals ─────────────────────────────────────────────────── */
   --gray-900: #0f172a;
   --gray-700: #334155;
   --gray-500: #64748b;
@@ -24,10 +39,12 @@
   --gray-100: #f1f5f9;
   --gray-50:  #f8fafc;
   --white: #ffffff;
+
+  /* ── Design tokens ────────────────────────────────────────────── */
   --radius: 16px;
   --radius-sm: 10px;
-  --shadow: 0 4px 24px rgba(15,23,42,0.10);
-  --shadow-lg: 0 12px 48px rgba(15,23,42,0.18);
+  --shadow: 0 4px 24px rgba(79,70,229,0.08);
+  --shadow-lg: 0 12px 48px rgba(79,70,229,0.18);
   --font: 'Plus Jakarta Sans', 'Noto Sans Arabic', sans-serif;
 }
 
@@ -481,6 +498,9 @@ body {
 .type-payment  { background: var(--blue-50);   color: var(--blue-700); }
 .type-loan     { background: var(--yellow-100); color: #92400e; }
 .type-customer { background: var(--green-100);  color: var(--green-600); }
+.type-companyDebt,
+.type-debt { background: #fff7ed; color: #c2410c; border-color: rgba(194,65,12,0.25); }
+.type-report { background: #f0fdf4; color: #15803d; border-color: rgba(21,128,61,0.25); }
 
 /* Staff-only blurred preview */
 .staff-only-blur {
@@ -489,7 +509,7 @@ body {
 }
 .staff-unlock-banner {
   text-align: center; padding: 14px 18px;
-  background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, #3730a3 0%, #4f46e5 60%, #7c3aed 100%);
   color: white; border-radius: 0 0 14px 14px;
 }
 .staff-unlock-banner p {
